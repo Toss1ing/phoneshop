@@ -2,11 +2,10 @@ package com.es.phoneshop.web.controller.pages;
 
 import com.es.core.order.OrderService;
 import com.es.core.order.OutOfStockException;
+import jakarta.annotation.Resource;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-
-import javax.annotation.Resource;
 
 @Controller
 @RequestMapping(value = "/order")
