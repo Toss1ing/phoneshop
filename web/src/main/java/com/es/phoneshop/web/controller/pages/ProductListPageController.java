@@ -7,7 +7,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import com.es.core.model.phone.PhoneDao;
+import com.es.core.dao.phone.PhoneDao;
 
 @Controller
 @RequestMapping (value = "/productList")
