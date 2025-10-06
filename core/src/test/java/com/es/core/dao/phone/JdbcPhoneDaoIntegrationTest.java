@@ -20,14 +20,14 @@ import static org.junit.jupiter.api.Assertions.*;
 @Transactional
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration("classpath:context/applicationContext-coreTest.xml")
-public class JdbcPhoneDaoIT {
+public class JdbcPhoneDaoIntegrationTest {
 
     private final JdbcPhoneDao jdbcPhoneDao;
     private final JdbcTemplate jdbcTemplate;
     private Phone basePhone;
 
     @Autowired
-    public JdbcPhoneDaoIT(
+    public JdbcPhoneDaoIntegrationTest(
             JdbcPhoneDao jdbcPhoneDao,
             JdbcTemplate jdbcTemplate
     ) {

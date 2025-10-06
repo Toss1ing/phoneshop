@@ -3,6 +3,7 @@ package com.es.core.dao.phone;
 import com.es.core.model.color.Color;
 import com.es.core.model.phone.Phone;
 import com.es.core.util.PhoneSql;
+import com.es.core.util.TableColumnsNames;
 import jakarta.annotation.Resource;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -35,11 +36,11 @@ public class JdbcPhoneDao implements PhoneDao {
     public Optional<Phone> get(final Long key) {
         List<Phone> phones = jdbcTemplate.query(PhoneSql.SELECT_PHONE_BY_ID, new Object[]{key}, phoneRowMapper);
 
-        if (phones.isEmpty()) {
+        Phone phone = phones.stream().findFirst().orElse(null);
+
+        if (phone == null) {
             return Optional.empty();
         }
-
-        Phone phone = phones.get(0);
 
         List<Color> colors = jdbcTemplate.query(
                 PhoneSql.SELECT_COLORS_BY_PHONE_ID,
@@ -93,11 +94,11 @@ public class JdbcPhoneDao implements PhoneDao {
 
         Map<Long, Set<Color>> colorsMap = new HashMap<>();
         jdbcTemplate.query(sqlColors, phoneIds.toArray(), rs -> {
-            Long phoneId = rs.getLong("phoneId");
+            Long phoneId = rs.getLong(TableColumnsNames.PHONE_ID);
 
             Color color = new Color();
-            color.setId(rs.getLong("id"));
-            color.setCode(rs.getString("code"));
+            color.setId(rs.getLong(TableColumnsNames.ID));
+            color.setCode(rs.getString(TableColumnsNames.CODE));
 
             colorsMap.computeIfAbsent(phoneId, k -> new HashSet<>()).add(color);
         });
