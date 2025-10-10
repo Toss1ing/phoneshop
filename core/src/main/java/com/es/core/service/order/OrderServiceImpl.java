@@ -1,6 +1,6 @@
 package com.es.core.service.order;
 
-import com.es.core.model.cart.Cart;
+import com.es.core.model.cart.CartItem;
 import com.es.core.exception.OutOfStockException;
 import com.es.core.model.order.Order;
 import org.springframework.stereotype.Service;
@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class OrderServiceImpl implements OrderService {
     @Override
-    public Order createOrder(Cart cart) {
+    public Order createOrder(CartItem cart) {
         throw new UnsupportedOperationException("TODO");
     }
 

@@ -1,9 +1,11 @@
 package com.es.core.dao.phone;
 
+import com.es.core.dao.pagination.Page;
+import com.es.core.dao.pagination.Pageable;
 import com.es.core.model.color.Color;
 import com.es.core.model.phone.Phone;
-import com.es.core.util.PhoneSql;
 import com.es.core.util.TableColumnsNames;
+import com.es.core.util.sql.PhoneSql;
 import jakarta.annotation.Resource;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -12,14 +14,12 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
+
 
 public class JdbcPhoneDao implements PhoneDao {
 
@@ -67,42 +67,58 @@ public class JdbcPhoneDao implements PhoneDao {
     }
 
     @Override
-    public List<Phone> findAll(int offset, int limit) {
-        List<Phone> phones = jdbcTemplate.query(PhoneSql.SELECT_PHONES_PAGINATED, new Object[]{limit, offset}, phoneRowMapper);
+    public Page<Phone> findAll(Pageable pageable, String search) {
+        int offset = pageable.page() * pageable.size();
 
-        if (phones.isEmpty()) {
-            return phones;
+        StringBuilder sqlSelect = new StringBuilder(PhoneSql.SELECT_PHONES_WITH_AVAILABLE_STOCK_AND_PRICE);
+        StringBuilder sqlCount = new StringBuilder(PhoneSql.COUNT_PHONES_WITH_AVAILABLE_STOCK_AND_PRICE);
+
+        List<Object> selectParams = new ArrayList<>();
+        List<Object> countParams = new ArrayList<>();
+
+        if (search != null && !search.isBlank()) {
+            sqlSelect.append(PhoneSql.SEARCH_BY_MODEL);
+            sqlCount.append(PhoneSql.SEARCH_BY_MODEL);
+
+            String searchPattern = "%" + search.toLowerCase() + "%";
+            selectParams.add(searchPattern);
+            countParams.add(searchPattern);
         }
 
-        List<Long> phoneIds = phones.stream().map(Phone::getId).toList();
-        Map<Long, Set<Color>> colorsForPhoneMap = getColorsForPhones(phoneIds);
+        String orderBy = resolveSortOption(pageable.sortField()) + " " + pageable.sortOrder();
+        sqlSelect.append(orderBy);
 
-        for (Phone phone : phones) {
-            phone.setColors(colorsForPhoneMap.getOrDefault(phone.getId(), new HashSet<>()));
+        sqlSelect.append(PhoneSql.PAGINATION);
+        selectParams.add(pageable.size());
+        selectParams.add(offset);
+
+        List<Phone> phones = jdbcTemplate.query(
+                sqlSelect.toString(),
+                selectParams.toArray(),
+                phoneRowMapper
+        );
+
+        Long totalElements = jdbcTemplate.queryForObject(
+                sqlCount.toString(),
+                countParams.toArray(),
+                Long.class
+        );
+
+        if (totalElements == null) {
+            totalElements = 0L;
         }
 
-        return phones;
+        return new Page<>(phones, pageable.page(), pageable.size(), totalElements);
     }
 
-    private Map<Long, Set<Color>> getColorsForPhones(List<Long> phoneIds) {
-        if (phoneIds.isEmpty()) {
-            return new HashMap<>();
-        }
-
-        String inClause = phoneIds.stream().map(id -> "?").collect(Collectors.joining(","));
-        String sqlColors = String.format(PhoneSql.SELECT_COLORS_BY_PHONE_IDS, inClause);
-
-        Map<Long, Set<Color>> colorsMap = new HashMap<>();
-        jdbcTemplate.query(sqlColors, phoneIds.toArray(), rs -> {
-            Long phoneId = rs.getLong(TableColumnsNames.PHONE_ID);
-
-            Color color = new Color();
-            color.setId(rs.getLong(TableColumnsNames.ID));
-            color.setCode(rs.getString(TableColumnsNames.CODE));
-
-            colorsMap.computeIfAbsent(phoneId, k -> new HashSet<>()).add(color);
-        });
-
-        return colorsMap;
+    private String resolveSortOption(String sortField) {
+        return switch (sortField) {
+            case TableColumnsNames.Phone.BRAND -> PhoneSql.ORDER_BY_BRAND;
+            case TableColumnsNames.Phone.MODEL -> PhoneSql.ORDER_BY_MODEL;
+            case TableColumnsNames.Phone.PRICE -> PhoneSql.ORDER_BY_PRICE;
+            case TableColumnsNames.Phone.DISPLAY_SIZE -> PhoneSql.ORDER_BY_DISPLAY_SIZE;
+            default -> PhoneSql.ORDER_BY_ID;
+        };
     }
+
 }

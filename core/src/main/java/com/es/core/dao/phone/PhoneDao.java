@@ -1,8 +1,9 @@
 package com.es.core.dao.phone;
 
+import com.es.core.dao.pagination.Page;
+import com.es.core.dao.pagination.Pageable;
 import com.es.core.model.phone.Phone;
 
-import java.util.List;
 import java.util.Optional;
 
 public interface PhoneDao {
@@ -10,5 +11,5 @@ public interface PhoneDao {
 
     void save(Phone phone);
 
-    List<Phone> findAll(int offset, int limit);
+    Page<Phone> findAll(Pageable pageable, String search);
 }

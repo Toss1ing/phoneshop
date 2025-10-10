@@ -1,6 +1,9 @@
 package com.es.core.dao.phone;
 
+import com.es.core.dao.pagination.Page;
+import com.es.core.dao.pagination.Pageable;
 import com.es.core.model.phone.Phone;
+import com.es.core.util.TableColumnsNames;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,7 +14,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -104,47 +106,99 @@ public class JdbcPhoneDaoIntegrationTest {
     }
 
     @Test
-    void testFindAllReturnsPhonesWithColors() {
+    void testFindAllReturnsPhonesWithoutSearch() {
+
         jdbcTemplate.update("INSERT INTO phones (id, brand, model, price) VALUES (?, ?, ?, ?)",
-                2L, "Samsung", "Galaxy S23", 1200);
-        jdbcTemplate.update("INSERT INTO colors (id, code) VALUES (?, ?)", 2L, "WHITE");
-        jdbcTemplate.update("INSERT INTO phone2color (phoneId, colorId) VALUES (?, ?)", 2L, 2L);
+                3L, "Apple", "iPhone 2", 1000);
+        jdbcTemplate.update("INSERT INTO phones (id, brand, model, price) VALUES (?, ?, ?, ?)",
+                4L, "Samsung", "Galaxy S23", 1200);
 
-        List<Phone> phones = jdbcPhoneDao.findAll(0, 10);
+        jdbcTemplate.update("INSERT INTO stocks (phoneId, stock, reserved) VALUES (?, ?, ?)", 3L, 5, 0);
+        jdbcTemplate.update("INSERT INTO stocks (phoneId, stock, reserved) VALUES (?, ?, ?)", 4L, 10, 0);
 
-        Optional<Phone> phoneWithColor = phones.stream()
-                .filter(p -> p.getId().equals(2L))
-                .findFirst();
+        Pageable pageable = new Pageable(0, 10, TableColumnsNames.ID, "asc");
+        Page<Phone> page = jdbcPhoneDao.findAll(pageable, null);
 
-        assertTrue(phoneWithColor.isPresent());
-        assertEquals(1, phoneWithColor.get().getColors().size());
-        assertTrue(phoneWithColor.get().getColors().stream()
-                .anyMatch(c -> c.getCode().equals("WHITE")));
+        assertEquals(2, page.content().size(), "Should return 2 phones");
+        assertEquals(0, page.pageNumber(), "Page index should be 0");
+        assertEquals(10, page.pageSize(), "Page size should be 10");
+        assertEquals(2, page.totalElements(), "Total elements should be 2");
     }
 
     @Test
-    void testFindAllReturnsPhonesWithoutColors() {
+    void testFindAllWithSearchFiltersPhones() {
         jdbcTemplate.update("INSERT INTO phones (id, brand, model, price) VALUES (?, ?, ?, ?)",
-                3L, "Nokia", "3310", 50);
+                3L, "Nokia", "Nokia 3310", 50);
+        jdbcTemplate.update("INSERT INTO phones (id, brand, model, price) VALUES (?, ?, ?, ?)",
+                4L, "Apple", "iPhone 15", 1500);
 
-        List<Phone> phones = jdbcPhoneDao.findAll(0, 10);
+        jdbcTemplate.update("INSERT INTO stocks (phoneId, stock, reserved) VALUES (?, ?, ?)", 3L, 20, 0);
+        jdbcTemplate.update("INSERT INTO stocks (phoneId, stock, reserved) VALUES (?, ?, ?)", 4L, 15, 0);
 
-        Optional<Phone> phoneWithoutColor = phones.stream()
-                .filter(p -> p.getId().equals(3L))
-                .findFirst();
+        Pageable pageable = new Pageable(0, 10, TableColumnsNames.ID, "asc");
+        Page<Phone> page = jdbcPhoneDao.findAll(pageable, "nokia");
 
-        assertTrue(phoneWithoutColor.isPresent());
-        assertTrue(phoneWithoutColor.get().getColors().isEmpty());
+        assertEquals(1, page.content().size(), "Should return 1 phone with model containing 'nokia'");
+        assertEquals("Nokia 3310", page.content().get(0).getModel());
     }
 
     @Test
-    void testFindAllReturnsEmptyListWhenNoPhones() {
+    void testFindAllWithSorting() {
+        jdbcTemplate.update("INSERT INTO phones (id, brand, model, price) VALUES (?, ?, ?, ?)",
+                5L, "Apple", "iPhone 12", 800);
+        jdbcTemplate.update("INSERT INTO phones (id, brand, model, price) VALUES (?, ?, ?, ?)",
+                6L, "Samsung", "Galaxy S24", 1300);
+        jdbcTemplate.update("INSERT INTO phones (id, brand, model, price) VALUES (?, ?, ?, ?)",
+                7L, "Nokia", "3310", 50);
+
+        jdbcTemplate.update("INSERT INTO stocks (phoneId, stock, reserved) VALUES (?, ?, ?)", 5L, 10, 0);
+        jdbcTemplate.update("INSERT INTO stocks (phoneId, stock, reserved) VALUES (?, ?, ?)", 6L, 10, 0);
+        jdbcTemplate.update("INSERT INTO stocks (phoneId, stock, reserved) VALUES (?, ?, ?)", 7L, 10, 0);
+
+        Pageable pageable = new Pageable(0, 10, TableColumnsNames.Phone.PRICE, "desc");
+        Page<Phone> page = jdbcPhoneDao.findAll(pageable, null);
+
+        assertEquals(3, page.content().size(), "Should return 3 phones");
+        assertTrue(
+                page.content().get(0).getPrice().compareTo(page.content().get(1).getPrice()) >= 0,
+                "Phones should be sorted by price descending"
+        );
+    }
+
+    @Test
+    void testFindAllWithPagination() {
+        for (long i = 5; i <= 15; i++) {
+            jdbcTemplate.update(
+                    "INSERT INTO phones (id, brand, model, price) VALUES (?, ?, ?, ?)",
+                    i, "Brand" + i, "Model" + i, 100 + i
+            );
+
+            jdbcTemplate.update(
+                    "INSERT INTO stocks (phoneId, stock, reserved) VALUES (?, ?, ?)",
+                    i, 10, 0
+            );
+        }
+
+        Pageable pageable = new Pageable(1, 5, TableColumnsNames.ID, "asc");
+        Page<Phone> page = jdbcPhoneDao.findAll(pageable, null);
+
+        assertEquals(5, page.content().size(), "Should return 5 phones for page 1");
+        assertEquals(1, page.pageNumber());
+        assertEquals(5, page.pageSize());
+        assertEquals(10L, page.content().get(0).getId(), "First phone on page 1 should have id=11");
+    }
+
+
+    @Test
+    void testFindAllReturnsEmptyPageWhenNoPhones() {
         jdbcTemplate.update("DELETE FROM phone2color");
         jdbcTemplate.update("DELETE FROM phones");
 
-        List<Phone> phones = jdbcPhoneDao.findAll(0, 10);
+        Pageable pageable = new Pageable(0, 10, TableColumnsNames.ID, "asc");
+        Page<Phone> page = jdbcPhoneDao.findAll(pageable, null);
 
-        assertTrue(phones.isEmpty(), "List of phones should be empty");
+        assertTrue(page.content().isEmpty(), "Content should be empty");
+        assertEquals(0, page.totalElements());
     }
 
 }

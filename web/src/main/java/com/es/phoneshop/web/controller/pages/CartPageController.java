@@ -12,9 +12,11 @@ public class CartPageController {
     @Resource
     private CartService cartService;
 
+    private static final String CART_PAGE_NAME = "cartPage";
+
     @RequestMapping(method = RequestMethod.GET)
-    public void getCart() {
-        cartService.getCart();
+    public String getCart() {
+        return CART_PAGE_NAME;
     }
 
     @RequestMapping(method = RequestMethod.PUT)
