@@ -61,7 +61,7 @@ public final class PhoneSql {
     public static final String ORDER_BY_BRAND = " ORDER BY LOWER(p.brand)";
     public static final String ORDER_BY_MODEL = " ORDER BY LOWER(p.model)";
     public static final String ORDER_BY_DISPLAY_SIZE = " ORDER BY p.displaySizeInches";
-    public static final String ORDER_BY_ID =  " ORDER BY p.id";
+    public static final String ORDER_BY_ID = " ORDER BY p.id";
 
     public static final String PAGINATION = " LIMIT ? OFFSET ?";
 }

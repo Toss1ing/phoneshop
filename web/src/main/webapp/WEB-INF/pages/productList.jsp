@@ -101,7 +101,7 @@
                         <a class="page-link"
                            href="?page=${currentPage - 1}&size=${pageSize}&sortField=${param.sortField}&sortOrder=${param.sortOrder}&search=${param.search}"
                            aria-label="Previous">
-                            &lt;
+                            <;
                         </a>
                     </li>
 
@@ -151,7 +151,7 @@
                         <a class="page-link"
                            href="?page=${currentPage + 1}&size=${pageSize}&sortField=${param.sortField}&sortOrder=${param.sortOrder}&search=${param.search}"
                            aria-label="Next">
-                            &gt;
+                            >;
                         </a>
                     </li>
                 </ul>

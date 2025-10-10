@@ -10,7 +10,6 @@ import com.es.core.model.phone.Phone;
 import com.es.core.model.phone.Stock;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpSession;
-import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.Map;

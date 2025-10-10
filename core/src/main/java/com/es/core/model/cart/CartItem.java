@@ -6,7 +6,8 @@ public class CartItem {
     private Phone phone;
     private Long quantity;
 
-    public CartItem() {}
+    public CartItem() {
+    }
 
     public CartItem(Phone phone, Long quantity) {
         this.phone = phone;

@@ -1,7 +1,6 @@
 package com.es.phoneshop.web.controller.pages;
 
 import com.es.core.exception.OutOfStockException;
-import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -13,7 +12,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 public class GlobalExceptionHandler {
 
     private static final String EXCEPTION_MESSAGE = "Internal server error";
-    private static final String VALIDATION_EXCEPTION_MESSAGE = "Quantity must be greater than 0";
 
     @ExceptionHandler
     public ResponseEntity<String> handleOutOfStockException(OutOfStockException ex) {
@@ -29,7 +27,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<String> handleGenericException(Exception ex) {
+    public ResponseEntity<String> handleGenericException() {
         return new ResponseEntity<>(EXCEPTION_MESSAGE, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 

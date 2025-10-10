@@ -5,16 +5,12 @@ import com.es.core.model.cart.Cart;
 import com.es.core.service.cart.CartService;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
@@ -36,6 +32,8 @@ public class AjaxCartController {
             @Valid @RequestBody AddPhoneToCartRequest request
     ) {
 
-        return new ResponseEntity<>(cartService.addPhone(request.getPhoneId(), request.getQuantity()), HttpStatus.ACCEPTED);
+        return new ResponseEntity<>(cartService.addPhone(request.getPhoneId(), request.getQuantity()),
+                HttpStatus.ACCEPTED
+        );
     }
 }
