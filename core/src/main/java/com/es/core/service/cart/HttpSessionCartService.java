@@ -8,6 +8,7 @@ import com.es.core.model.cart.Cart;
 import com.es.core.model.cart.CartItem;
 import com.es.core.model.phone.Phone;
 import com.es.core.model.phone.Stock;
+import com.es.core.util.ExceptionMessage;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpSession;
 
@@ -67,7 +68,10 @@ public class HttpSessionCartService implements CartService {
         lock.writeLock().lock();
         try {
             Phone phone = phoneDao.get(phoneId)
-                    .orElseThrow(() -> new NotFoundException("Phone not found"));
+                    .orElseThrow(() -> new NotFoundException(String.format(
+                            ExceptionMessage.PHONE_NOT_FOUND_BY_ID_MESSAGE,
+                            phoneId
+                    )));
 
             Cart cart = getSessionCart();
 
@@ -125,10 +129,13 @@ public class HttpSessionCartService implements CartService {
 
     private void validateQuantity(long newQuantity, Long phoneId) {
         Stock stock = stockDao.getStockByPhoneId(phoneId)
-                .orElseThrow(() -> new NotFoundException("Stock for phone with id not found"));
+                .orElseThrow(() -> new NotFoundException(String.format(
+                        ExceptionMessage.STOCK_NOT_FOUND_BY_PHONE_MESSAGE,
+                        phoneId
+                )));
 
         if (newQuantity > stock.getStock()) {
-            throw new OutOfStockException("Out of stock");
+            throw new OutOfStockException(ExceptionMessage.OUT_OF_STOCK_MESSAGE);
         }
     }
 
