@@ -62,8 +62,6 @@ public class HttpSessionCartService implements CartService {
 
     @Override
     public Cart addPhone(Long phoneId, Long quantity) {
-        //TODO validate phoneId and quantity
-        //TODO write all messages on new class in package util
 
         ReadWriteLock lock = getLock();
         lock.writeLock().lock();
@@ -71,25 +69,16 @@ public class HttpSessionCartService implements CartService {
             Phone phone = phoneDao.get(phoneId)
                     .orElseThrow(() -> new NotFoundException("Phone not found"));
 
-            Stock stock = stockDao.getStockByPhoneId(phoneId)
-                    .orElseThrow(() -> new NotFoundException("Stock for phone with id not found"));
-
             Cart cart = getSessionCart();
 
-            Optional<CartItem> existCartItem = cart.getItems().stream()
-                    .filter(cartItem -> cartItem.getPhone().getId().equals(phone.getId()))
-                    .findFirst();
+            CartItem existCartItem = getCartItemByPhoneId(phoneId, cart);
 
-            long newQuantity = existCartItem
-                    .map(item -> item.getQuantity() + quantity)
-                    .orElse(quantity);
+            long newQuantity = getNewQuantity(existCartItem, quantity);
 
-            if (newQuantity > stock.getStock()) {
-                throw new OutOfStockException("Out of stock");
-            }
+            validateQuantity(newQuantity, phoneId);
 
-            if (existCartItem.isPresent()) {
-                existCartItem.get().setQuantity(newQuantity);
+            if (existCartItem != null) {
+                existCartItem.setQuantity(newQuantity);
             } else {
                 cart.getItems().add(new CartItem(phone, newQuantity));
             }
@@ -125,6 +114,29 @@ public class HttpSessionCartService implements CartService {
 
         cart.setTotalPrice(totalPrice);
         cart.setTotalQuantity(totalQuantity);
+    }
+
+    private long getNewQuantity(CartItem existCartItem, long quantity) {
+        if(existCartItem == null) {
+            return quantity;
+        }
+        return existCartItem.getQuantity() + quantity;
+    }
+
+    private void validateQuantity(long newQuantity, Long phoneId) {
+        Stock stock = stockDao.getStockByPhoneId(phoneId)
+                .orElseThrow(() -> new NotFoundException("Stock for phone with id not found"));
+
+        if (newQuantity > stock.getStock()) {
+            throw new OutOfStockException("Out of stock");
+        }
+    }
+
+    private CartItem getCartItemByPhoneId(Long phoneId, Cart cart) {
+        return cart.getItems().stream()
+                .filter(cartItem -> cartItem.getPhone().getId().equals(phoneId))
+                .findFirst()
+                .orElse(null);
     }
 
 }

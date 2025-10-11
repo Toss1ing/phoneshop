@@ -36,21 +36,16 @@ public class JdbcPhoneDao implements PhoneDao {
     public Optional<Phone> get(final Long key) {
         List<Phone> phones = jdbcTemplate.query(PhoneSql.SELECT_PHONE_BY_ID, new Object[]{key}, phoneRowMapper);
 
-        Phone phone = phones.stream().findFirst().orElse(null);
+        return phones.stream().findFirst().map(phone -> {
+            List<Color> colors = jdbcTemplate.query(
+                    PhoneSql.SELECT_COLORS_BY_PHONE_ID,
+                    new Object[]{key},
+                    new BeanPropertyRowMapper<>(Color.class)
+            );
 
-        if (phone == null) {
-            return Optional.empty();
-        }
-
-        List<Color> colors = jdbcTemplate.query(
-                PhoneSql.SELECT_COLORS_BY_PHONE_ID,
-                new Object[]{key},
-                new BeanPropertyRowMapper<>(Color.class)
-        );
-
-        phone.setColors(new HashSet<>(colors));
-
-        return Optional.of(phone);
+            phone.setColors(new HashSet<>(colors));
+            return phone;
+        });
     }
 
     @Override

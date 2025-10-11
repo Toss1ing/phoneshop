@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 public class GlobalExceptionHandler {
 
     private static final String EXCEPTION_MESSAGE = "Internal server error";
+    private static final String INVALID_REQUEST = "Invalid request";
 
     @ExceptionHandler
     public ResponseEntity<String> handleOutOfStockException(OutOfStockException ex) {
@@ -21,7 +22,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<String> handleValidationExceptions(MethodArgumentNotValidException ex) {
         FieldError fieldError = ex.getBindingResult().getFieldError();
-        String message = fieldError != null ? fieldError.getDefaultMessage() : "Invalid request";
+        String message = fieldError != null ? fieldError.getDefaultMessage() : INVALID_REQUEST;
 
         return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
     }

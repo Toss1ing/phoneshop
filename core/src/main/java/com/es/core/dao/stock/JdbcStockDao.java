@@ -25,12 +25,6 @@ public class JdbcStockDao implements StockDao {
                 stockRowMapper
         );
 
-        Stock stock = stocks.stream().findFirst().orElse(null);
-
-        if (stock == null) {
-            return Optional.empty();
-        }
-
-        return Optional.of(stock);
+        return stocks.stream().findFirst();
     }
 }

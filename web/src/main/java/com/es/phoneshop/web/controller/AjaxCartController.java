@@ -32,7 +32,8 @@ public class AjaxCartController {
             @Valid @RequestBody AddPhoneToCartRequest request
     ) {
 
-        return new ResponseEntity<>(cartService.addPhone(request.getPhoneId(), request.getQuantity()),
+        return new ResponseEntity<>(
+                cartService.addPhone(request.getPhoneId(), request.getQuantity()),
                 HttpStatus.ACCEPTED
         );
     }
