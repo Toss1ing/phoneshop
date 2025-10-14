@@ -37,7 +37,6 @@ public class JdbcColorDaoIntegrationTest {
 
     @BeforeEach
     void setup() {
-        clearTables();
         phoneId1 = insertPhone("Apple", "iPhone 14", 1000);
         phoneId2 = insertPhone("Samsung", "Galaxy S23", 1200);
     }
