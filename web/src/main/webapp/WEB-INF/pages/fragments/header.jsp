@@ -7,7 +7,6 @@
                 Phonify
             </h2>
         </a>
-
         <div class="collapse navbar-collapse justify-content-end" id="navbarContent">
             <ul class="navbar-nav">
 

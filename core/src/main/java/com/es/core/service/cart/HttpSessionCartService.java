@@ -14,7 +14,6 @@ import jakarta.servlet.http.HttpSession;
 
 import java.math.BigDecimal;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -121,7 +120,7 @@ public class HttpSessionCartService implements CartService {
     }
 
     private long getNewQuantity(CartItem existCartItem, long quantity) {
-        if(existCartItem == null) {
+        if (existCartItem == null) {
             return quantity;
         }
         return existCartItem.getQuantity() + quantity;
@@ -144,6 +143,10 @@ public class HttpSessionCartService implements CartService {
                 .filter(cartItem -> cartItem.getPhone().getId().equals(phoneId))
                 .findFirst()
                 .orElse(null);
+    }
+
+    public void removeLockForSession(String sessionId) {
+        sessionLocks.remove(sessionId);
     }
 
 }

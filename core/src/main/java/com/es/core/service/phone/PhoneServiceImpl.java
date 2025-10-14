@@ -6,8 +6,10 @@ import com.es.core.dao.pagination.Pageable;
 import com.es.core.dao.phone.PhoneDao;
 import com.es.core.dto.PhoneDto;
 import com.es.core.exception.NotFoundException;
+import com.es.core.exception.NotValidDataException;
 import com.es.core.model.color.Color;
 import com.es.core.model.phone.Phone;
+import com.es.core.util.ExceptionMessage;
 import jakarta.annotation.Resource;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -60,17 +62,13 @@ public class PhoneServiceImpl implements PhoneService {
     @Override
     public Phone findPhoneById(Long phoneId) {
         if (phoneId == null) {
-            throw new NotFoundException("phone id is null");
+            throw new NotValidDataException(ExceptionMessage.PHONE_ID_IS_NULL);
         }
 
-        Phone phone = phoneDao
-                .get(phoneId)
-                .orElseThrow(() -> new NotFoundException("phone id not found"));
-
-        Set<Color> colors = colorDao.findColorsByPhoneId(phoneId);
-        phone.setColors(colors);
-
-        return phone;
+        return phoneDao.get(phoneId).orElseThrow(() -> new NotFoundException(String.format(
+                ExceptionMessage.PHONE_NOT_FOUND_BY_ID_MESSAGE,
+                phoneId
+        )));
     }
 
     @Override

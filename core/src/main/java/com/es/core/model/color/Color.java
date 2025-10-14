@@ -31,4 +31,5 @@ public class Color {
     public void setCode(final String code) {
         this.code = code;
     }
+
 }

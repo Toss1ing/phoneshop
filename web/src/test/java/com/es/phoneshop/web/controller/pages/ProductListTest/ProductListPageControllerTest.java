@@ -1,9 +1,10 @@
-package com.es.phoneshop.web.controller.pages;
+package com.es.phoneshop.web.controller.pages.ProductListTest;
 
 import com.es.core.dao.pagination.Page;
 import com.es.core.dao.pagination.Pageable;
 import com.es.core.dto.PhoneDto;
 import com.es.core.service.phone.PhoneService;
+import com.es.phoneshop.web.controller.pages.ProductListPageController;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;

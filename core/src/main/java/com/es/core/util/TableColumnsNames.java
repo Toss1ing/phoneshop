@@ -24,7 +24,6 @@ public final class TableColumnsNames {
 
         public static final String COLOR_ID = "colorId";
         public static final String CODE = "code";
-        public static final String COLOR_IDS = "colorIds";
     }
 }
 

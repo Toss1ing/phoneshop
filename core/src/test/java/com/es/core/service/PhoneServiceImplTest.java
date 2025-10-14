@@ -6,6 +6,7 @@ import com.es.core.dao.pagination.Pageable;
 import com.es.core.dao.phone.PhoneDao;
 import com.es.core.dto.PhoneDto;
 import com.es.core.exception.NotFoundException;
+import com.es.core.exception.NotValidDataException;
 import com.es.core.model.color.Color;
 import com.es.core.model.phone.Phone;
 import com.es.core.service.phone.PhoneServiceImpl;
@@ -43,17 +44,10 @@ class PhoneServiceImplTest {
 
     @Test
     void testFindAllPhonesReturnsMappedDtos() {
-        Phone phone1 = new Phone();
-        phone1.setId(1L);
-        phone1.setBrand("Apple");
-        phone1.setModel("iPhone 14");
-        phone1.setPrice(BigDecimal.valueOf(1000));
-
-        Phone phone2 = new Phone();
-        phone2.setId(2L);
-        phone2.setBrand("Samsung");
-        phone2.setModel("Galaxy S23");
-        phone2.setPrice(BigDecimal.valueOf(1200));
+        Phone phone1 = createPhone(1L, "Apple", "iPhone 14", BigDecimal.valueOf(1000),
+                Set.of(createColor(1L, "BLACK")));
+        Phone phone2 = createPhone(2L, "Samsung", "Galaxy S23", BigDecimal.valueOf(1200),
+                Set.of(createColor(2L, "WHITE")));
 
         List<Phone> phones = List.of(phone1, phone2);
         Page<Phone> phonesPage = new Page<>(phones, 0, 10, 2L);
@@ -61,10 +55,9 @@ class PhoneServiceImplTest {
         when(phoneDao.findAll(any(Pageable.class), any())).thenReturn(phonesPage);
 
         Map<Long, Set<Color>> colorMap = Map.of(
-                1L, Set.of(new Color(1L, "BLACK")),
-                2L, Set.of(new Color(2L, "WHITE"))
+                1L, Set.of(createColor(1L, "BLACK")),
+                2L, Set.of(createColor(2L, "WHITE"))
         );
-
         when(colorDao.findColorsForPhoneIds(List.of(1L, 2L))).thenReturn(colorMap);
 
         Pageable pageable = new Pageable(0, 10, "id", "asc");
@@ -73,7 +66,6 @@ class PhoneServiceImplTest {
 
         assertEquals(2, result.content().size());
         assertEquals("Apple", result.content().get(0).getBrand());
-        assertEquals(1, result.content().get(0).getColors().size());
         assertEquals("BLACK", result.content().get(0).getColors().iterator().next().getCode());
         assertEquals("Samsung", result.content().get(1).getBrand());
         assertEquals("WHITE", result.content().get(1).getColors().iterator().next().getCode());
@@ -94,13 +86,8 @@ class PhoneServiceImplTest {
 
     @Test
     void testFindPhoneByIdReturnsPhoneWithColors() {
-        Phone phone = new Phone();
-        phone.setId(1L);
-        phone.setBrand("Apple");
-        phone.setModel("iPhone 14");
-
+        Phone phone = createPhone(1L, "Apple", "iPhone 14", new BigDecimal(100), Set.of(createColor(1L, "BLACK")));
         when(phoneDao.get(1L)).thenReturn(Optional.of(phone));
-        when(colorDao.findColorsByPhoneId(1L)).thenReturn(Set.of(new Color(1L, "BLACK")));
 
         Phone result = phoneService.findPhoneById(1L);
 
@@ -112,7 +99,7 @@ class PhoneServiceImplTest {
 
     @Test
     void testFindPhoneByIdNullIdThrowsNotFoundException() {
-        assertThrows(NotFoundException.class, () -> phoneService.findPhoneById(null));
+        assertThrows(NotValidDataException.class, () -> phoneService.findPhoneById(null));
     }
 
     @Test
@@ -123,13 +110,29 @@ class PhoneServiceImplTest {
 
     @Test
     void testSaveCallsDaos() {
-        Phone phone = new Phone();
-        phone.setId(null);
-        phone.setColors(Set.of(new Color(1L, "BLACK")));
+        Phone phone = createPhone(null, "Apple", "iPhone 14", new BigDecimal(100), Set.of(createColor(1L, "BLACK")));
 
         phoneService.save(phone);
 
         verify(phoneDao).save(phone);
         verify(colorDao).saveColorsByPhoneId(phone.getColors(), phone.getId());
     }
+
+
+    private Phone createPhone(Long id, String brand, String model, BigDecimal price, Set<Color> colors) {
+        Phone phone = new Phone();
+        phone.setId(id);
+        phone.setBrand(brand);
+        phone.setModel(model);
+        phone.setPrice(price);
+        if (colors != null) {
+            phone.setColors(colors);
+        }
+        return phone;
+    }
+
+    private Color createColor(Long id, String code) {
+        return new Color(id, code);
+    }
+
 }

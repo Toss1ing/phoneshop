@@ -12,8 +12,11 @@ public class ColorRowMapper implements RowMapper<Color> {
     public Color mapRow(ResultSet rs, int rowNum) throws SQLException {
         Color color = new Color();
 
-        color.setId(getNullableLong(rs, "id"));
-        color.setCode(rs.getString("code"));
+        Long id = getNullableLong(rs, hasColumn(rs, "colorId") ? "colorId" : "id");
+        String code = rs.getString(hasColumn(rs, "colorCode") ? "colorCode" : "code");
+
+        color.setId(id);
+        color.setCode(code);
 
         return color;
     }
@@ -21,5 +24,14 @@ public class ColorRowMapper implements RowMapper<Color> {
     private Long getNullableLong(ResultSet rs, String columnName) throws SQLException {
         long value = rs.getLong(columnName);
         return rs.wasNull() ? null : value;
+    }
+
+    private boolean hasColumn(ResultSet rs, String columnName) {
+        try {
+            rs.findColumn(columnName);
+            return true;
+        } catch (SQLException e) {
+            return false;
+        }
     }
 }

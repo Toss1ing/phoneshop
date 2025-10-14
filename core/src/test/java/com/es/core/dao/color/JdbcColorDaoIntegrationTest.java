@@ -10,6 +10,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -18,11 +19,13 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Transactional
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration("classpath:context/applicationContext-coreTest.xml")
 public class JdbcColorDaoIntegrationTest {
+
     @Autowired
     private JdbcColorDao jdbcColorDao;
 
@@ -34,21 +37,13 @@ public class JdbcColorDaoIntegrationTest {
 
     @BeforeEach
     void setup() {
-        jdbcTemplate.update("DELETE FROM phone2color");
-        jdbcTemplate.update("DELETE FROM colors");
-        jdbcTemplate.update("DELETE FROM phones");
-
-        phoneId1 = 1L;
-        phoneId2 = 2L;
-
-        jdbcTemplate.update("INSERT INTO phones (id, brand, model, price) VALUES (?, ?, ?, ?)",
-                phoneId1, "Apple", "iPhone 14", 1000);
-        jdbcTemplate.update("INSERT INTO phones (id, brand, model, price) VALUES (?, ?, ?, ?)",
-                phoneId2, "Samsung", "Galaxy S24", 1300);
+        clearTables();
+        phoneId1 = insertPhone("Apple", "iPhone 14", 1000);
+        phoneId2 = insertPhone("Samsung", "Galaxy S23", 1200);
     }
 
     @Test
-    void testSaveColorsByPhoneIdInsertsAndUpdatesCorrectly() {
+    void testSaveColorsByPhoneIdInsertsNewColors() {
         Set<Color> colors = Set.of(
                 new Color(null, "BLACK"),
                 new Color(null, "WHITE")
@@ -56,91 +51,87 @@ public class JdbcColorDaoIntegrationTest {
 
         jdbcColorDao.saveColorsByPhoneId(colors, phoneId1);
 
-        List<Map<String, Object>> phone2colorRows =
-                jdbcTemplate.queryForList("SELECT * FROM phone2color WHERE phoneId = ?", phoneId1);
-        assertEquals(2, phone2colorRows.size(), "Should have 2 colors linked to phone");
+        Set<String> codes = getColorCodesForPhone(phoneId1);
+        assertEquals(Set.of("BLACK", "WHITE"), codes, "Colors should be inserted correctly");
+    }
+
+    @Test
+    void testSaveColorsByPhoneIdUpdatesExistingColors() {
+        Long blackId = insertColor("BLACK");
+        Long whiteId = insertColor("WHITE");
+        insertPhone2Color(phoneId1, blackId);
+        insertPhone2Color(phoneId1, whiteId);
 
         Set<Color> updatedColors = Set.of(
                 new Color(null, "WHITE"),
                 new Color(null, "RED")
         );
+
         jdbcColorDao.saveColorsByPhoneId(updatedColors, phoneId1);
 
-        List<String> colorCodes = jdbcTemplate.query(
-                "SELECT c.code FROM colors c JOIN phone2color p2c ON c.id = p2c.colorId WHERE p2c.phoneId = ?",
-                (rs, i) -> rs.getString("code"),
-                phoneId1
-        );
-
-        assertEquals(Set.of("WHITE", "RED"), new HashSet<>(colorCodes),
-                "Phone should now have updated color set");
+        Set<String> codes = getColorCodesForPhone(phoneId1);
+        assertEquals(Set.of("WHITE", "RED"), codes, "Colors should be updated correctly");
     }
 
     @Test
-    void testFindColorsByPhoneIdReturnsCorrectColors() {
-        Long colorBlackId = insertColor("BLACK");
-        Long colorWhiteId = insertColor("WHITE");
-
-        jdbcTemplate.update("INSERT INTO phone2color (phoneId, colorId) VALUES (?, ?)", phoneId1, colorBlackId);
-        jdbcTemplate.update("INSERT INTO phone2color (phoneId, colorId) VALUES (?, ?)", phoneId1, colorWhiteId);
-
-        Set<Color> colors = jdbcColorDao.findColorsByPhoneId(phoneId1);
-
-        Set<String> colorCodes = colors.stream().map(Color::getCode).collect(Collectors.toSet());
-        assertEquals(Set.of("BLACK", "WHITE"), colorCodes, "Should return both colors for phone");
-    }
-
-    @Test
-    void testFindColorsForPhoneIdsReturnsColorsGroupedByPhone() {
-        Long redId = insertColor("RED");
-        Long blueId = insertColor("BLUE");
-        Long greenId = insertColor("GREEN");
-
-        jdbcTemplate.update("INSERT INTO phone2color (phoneId, colorId) VALUES (?, ?)", phoneId1, redId);
-        jdbcTemplate.update("INSERT INTO phone2color (phoneId, colorId) VALUES (?, ?)", phoneId1, blueId);
-        jdbcTemplate.update("INSERT INTO phone2color (phoneId, colorId) VALUES (?, ?)", phoneId2, greenId);
-
-        Map<Long, Set<Color>> map = jdbcColorDao.findColorsForPhoneIds(List.of(phoneId1, phoneId2));
-
-        assertEquals(2, map.size(), "Should return colors for 2 phones");
-        assertEquals(Set.of("RED", "BLUE"), map.get(phoneId1).stream().map(Color::getCode).collect(Collectors.toSet()));
-        assertEquals(Set.of("GREEN"), map.get(phoneId2).stream().map(Color::getCode).collect(Collectors.toSet()));
-    }
-
-    @Test
-    void testSaveColorsByPhoneIdDeletesAllWhenEmptySetPassed() {
+    void testSaveColorsByPhoneIdDeletesAllWhenEmpty() {
         Long blackId = insertColor("BLACK");
-        jdbcTemplate.update("INSERT INTO phone2color (phoneId, colorId) VALUES (?, ?)", phoneId1, blackId);
+        insertPhone2Color(phoneId1, blackId);
 
         jdbcColorDao.saveColorsByPhoneId(Collections.emptySet(), phoneId1);
 
-        int count = jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM phone2color WHERE phoneId = ?",
-                Integer.class,
-                phoneId1
-        );
-        assertEquals(0, count, "Should delete all colors for phone");
+        Set<String> codes = getColorCodesForPhone(phoneId1);
+        assertTrue(codes.isEmpty(), "All colors should be deleted");
     }
 
     @Test
-    void testFindOrCreateColorCreatesNewIfNotExists() {
-        Long colorId = jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM colors WHERE code = 'PINK'",
-                Long.class
-        );
-        assertEquals(0L, colorId, "PINK color should not exist yet");
+    void testFindColorsForPhoneIds() {
+        Long blackId = insertColor("BLACK");
+        Long redId = insertColor("RED");
 
-        jdbcColorDao.saveColorsByPhoneId(Set.of(new Color(null, "PINK")), phoneId1);
+        insertPhone2Color(phoneId1, blackId);
+        insertPhone2Color(phoneId2, redId);
 
-        Long pinkCount = jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM colors WHERE code = 'PINK'",
-                Long.class
-        );
-        assertEquals(1L, pinkCount, "Should create new color in DB");
+        Map<Long, Set<Color>> map = jdbcColorDao.findColorsForPhoneIds(Arrays.asList(phoneId1, phoneId2));
+
+        assertEquals(2, map.size());
+        assertEquals(Set.of("BLACK"), map.get(phoneId1).stream().map(Color::getCode).collect(Collectors.toSet()));
+        assertEquals(Set.of("RED"), map.get(phoneId2).stream().map(Color::getCode).collect(Collectors.toSet()));
+    }
+
+    @Test
+    void testFindColorsForPhoneIdsReturnsEmptyMapForNoPhones() {
+        Map<Long, Set<Color>> map = jdbcColorDao.findColorsForPhoneIds(Collections.emptyList());
+        assertTrue(map.isEmpty(), "Map should be empty when no phone IDs passed");
+    }
+
+
+    private void clearTables() {
+        jdbcTemplate.update("DELETE FROM phone2color");
+        jdbcTemplate.update("DELETE FROM colors");
+        jdbcTemplate.update("DELETE FROM phones");
+    }
+
+    private Long insertPhone(String brand, String model, int price) {
+        jdbcTemplate.update("INSERT INTO phones (brand, model, price) VALUES (?, ?, ?)", brand, model, price);
+        return jdbcTemplate.queryForObject("SELECT id FROM phones WHERE brand=? AND model=?", Long.class, brand, model);
     }
 
     private Long insertColor(String code) {
         jdbcTemplate.update("INSERT INTO colors (code) VALUES (?)", code);
-        return jdbcTemplate.queryForObject("SELECT id FROM colors WHERE code = ?", Long.class, code);
+        return jdbcTemplate.queryForObject("SELECT id FROM colors WHERE code=?", Long.class, code);
+    }
+
+    private void insertPhone2Color(Long phoneId, Long colorId) {
+        jdbcTemplate.update("INSERT INTO phone2color (phoneId, colorId) VALUES (?, ?)", phoneId, colorId);
+    }
+
+    private Set<String> getColorCodesForPhone(Long phoneId) {
+        List<String> codes = jdbcTemplate.queryForList(
+                "SELECT c.code FROM colors c JOIN phone2color p2c ON c.id = p2c.colorId WHERE p2c.phoneId = ?",
+                String.class,
+                phoneId
+        );
+        return new HashSet<>(codes);
     }
 }

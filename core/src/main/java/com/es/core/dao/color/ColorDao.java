@@ -8,8 +8,6 @@ import java.util.Set;
 
 public interface ColorDao {
 
-    Set<Color> findColorsByPhoneId(Long phoneId);
-
     Map<Long, Set<Color>> findColorsForPhoneIds(List<Long> phoneIds);
 
     void saveColorsByPhoneId(Set<Color> colors, Long phoneId);

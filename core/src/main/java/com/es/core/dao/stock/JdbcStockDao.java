@@ -1,9 +1,11 @@
 package com.es.core.dao.stock;
 
 import com.es.core.model.phone.Stock;
+import com.es.core.util.TableColumnsNames;
 import com.es.core.util.sql.StockSql;
 import jakarta.annotation.Resource;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 import java.util.List;
 import java.util.Optional;
@@ -15,13 +17,16 @@ public class JdbcStockDao implements StockDao {
     StockRowMapper stockRowMapper;
 
     @Resource
-    JdbcTemplate jdbcTemplate;
+    private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
     @Override
     public Optional<Stock> getStockByPhoneId(Long phoneId) {
-        List<Stock> stocks = jdbcTemplate.query(
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue(TableColumnsNames.Phone.PHONE_ID, phoneId);
+
+        List<Stock> stocks = namedParameterJdbcTemplate.query(
                 StockSql.FIND_STOCK_STOCK_BY_PHONE_ID,
-                new Object[]{phoneId},
+                params,
                 stockRowMapper
         );
 
