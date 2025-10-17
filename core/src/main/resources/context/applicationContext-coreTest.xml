@@ -37,4 +37,10 @@
 
     <bean id="phoneRowMapper" class="com.es.core.dao.phone.PhoneRowMapper"/>
     <bean id="jdbcPhoneDao" class="com.es.core.dao.phone.JdbcPhoneDao"/>
+
+    <bean id="jdbcColorDao" class="com.es.core.dao.color.JdbcColorDao"/>
+    <bean id="colorRowMapper" class="com.es.core.dao.color.ColorRowMapper"/>
+
+    <bean id="stockRowMapper" class="com.es.core.dao.stock.StockRowMapper"/>
+    <bean id="jdbcStockDao" class="com.es.core.dao.stock.JdbcStockDao"/>
 </beans>

@@ -1,17 +1,18 @@
-package com.es.core.util;
+package com.es.core.util.sql;
 
 public final class PhoneSql {
 
     private PhoneSql() {
     }
 
-    public static final String SELECT_PHONE_BY_ID = "SELECT * FROM phones WHERE id = ?";
-
-    public static final String SELECT_COLORS_BY_PHONE_ID = """
-                SELECT c.id, c.code
-                FROM colors c
-                JOIN phone2color pc ON c.id = pc.colorId
-                WHERE pc.phoneId = ?
+    public static final String SELECT_PHONE_BY_ID_WITH_COLORS = """
+                SELECT p.*,
+                       c.id AS colorId,
+                       c.code AS colorCode
+                FROM phones p
+                LEFT JOIN phone2color pc ON p.id = pc.phoneId
+                LEFT JOIN colors c ON pc.colorId = c.id
+                WHERE p.id = :phoneId
             """;
 
     public static final String INSERT_PHONE = """
@@ -43,13 +44,29 @@ public final class PhoneSql {
                 WHERE id=:id
             """;
 
-    public static final String SELECT_PHONES_PAGINATED = "SELECT * FROM phones ORDER BY id LIMIT ? OFFSET ?";
-
-    public static final String SELECT_COLORS_BY_PHONE_IDS = """
-                SELECT pc.phoneId, c.id, c.code
-                FROM phone2color pc
-                JOIN colors c ON pc.colorId = c.id
-                WHERE pc.phoneId IN (%s)
+    public static final String SELECT_PHONES_WITH_AVAILABLE_STOCK_AND_PRICE = """
+                SELECT p.* FROM phones p
+                    JOIN stocks s ON p.id = s.phoneId
+                    WHERE s.stock > 0 AND p.price IS NOT NULL
             """;
 
+    public static final String COUNT_PHONES_WITH_AVAILABLE_STOCK_AND_PRICE = """
+                SELECT COUNT(DISTINCT p.id) FROM phones p
+                    JOIN stocks s ON p.id = s.phoneId
+                    WHERE s.stock > 0 AND p.price IS NOT NULL
+            """;
+
+    public static final String SEARCH_BY_MODEL = " AND LOWER(p.model) LIKE :search";
+
+    public static final String ORDER_BY_PRICE = " ORDER BY p.price";
+
+    public static final String ORDER_BY_BRAND = " ORDER BY LOWER(p.brand)";
+
+    public static final String ORDER_BY_MODEL = " ORDER BY LOWER(p.model)";
+
+    public static final String ORDER_BY_DISPLAY_SIZE = " ORDER BY p.displaySizeInches";
+
+    public static final String ORDER_BY_ID = " ORDER BY p.id";
+
+    public static final String PAGINATION = " LIMIT :limit OFFSET :offset";
 }
