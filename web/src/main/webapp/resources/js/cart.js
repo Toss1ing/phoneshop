@@ -1,6 +1,5 @@
 $(document).ready(function () {
-    const ajaxUrl = 'ajaxCart'
-
+    const ajaxUrl = '/phoneshop-web/ajaxCart';
     const totalQuantityElement = '#cart-total-quantity'
     const totalPriceElement = '#cart-total-price'
     const addToCardButton = '.add-to-cart-btn'

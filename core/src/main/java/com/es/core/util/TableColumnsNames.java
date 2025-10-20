@@ -25,5 +25,12 @@ public final class TableColumnsNames {
         public static final String COLOR_ID = "colorId";
         public static final String CODE = "code";
     }
+
+    public static final class Stock {
+        private Stock() {
+        }
+
+        public static final String RESERVED_QUANTITY = "quantity";
+    }
 }
 

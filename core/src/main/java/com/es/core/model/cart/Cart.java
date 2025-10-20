@@ -1,10 +1,11 @@
 package com.es.core.model.cart;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Cart {
+public class Cart implements Serializable {
     private List<CartItem> items;
     private long totalQuantity;
     private BigDecimal totalPrice;
@@ -25,6 +26,12 @@ public class Cart {
         this.items = items;
         this.totalQuantity = totalQuantity;
         this.totalPrice = totalPrice;
+    }
+
+    public Cart(Cart cart) {
+        this.items = cart.getItems();
+        this.totalQuantity = cart.getTotalQuantity();
+        this.totalPrice = cart.getTotalPrice();
     }
 
     public List<CartItem> getItems() {

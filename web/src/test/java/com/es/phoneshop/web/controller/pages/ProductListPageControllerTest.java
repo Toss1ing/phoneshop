@@ -1,4 +1,4 @@
-package com.es.phoneshop.web.controller.pages.ProductListTest;
+package com.es.phoneshop.web.controller.pages;
 
 import com.es.core.dao.pagination.Page;
 import com.es.core.dao.pagination.Pageable;

@@ -1,5 +1,6 @@
 package com.es.core.dto;
 
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 
@@ -10,7 +11,8 @@ public class AddPhoneToCartRequest {
 
     @NotNull(message = "quantity must not be null")
     @Min(value = 1, message = "quantity must be at least 1")
-    private Long quantity;
+    @Max(value = Short.MAX_VALUE, message = "Very large quantity")
+    private Integer quantity;
 
     public Long getPhoneId() {
         return phoneId;
@@ -20,11 +22,11 @@ public class AddPhoneToCartRequest {
         this.phoneId = phoneId;
     }
 
-    public Long getQuantity() {
+    public Integer getQuantity() {
         return quantity;
     }
 
-    public void setQuantity(Long quantity) {
+    public void setQuantity(Integer quantity) {
         this.quantity = quantity;
     }
 

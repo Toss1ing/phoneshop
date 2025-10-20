@@ -8,13 +8,9 @@ public interface CartService {
 
     Cart getCart();
 
-    Cart addPhone(Long phoneId, Long quantity);
+    Cart addPhone(Long phoneId, Integer quantity);
 
-    /**
-     * @param items key: {@link com.es.core.model.phone.Phone#id}
-     *              value: quantity
-     */
-    void update(Map<Long, Long> items);
+    void update(Map<Long, Integer> items);
 
     void remove(Long phoneId);
 }
