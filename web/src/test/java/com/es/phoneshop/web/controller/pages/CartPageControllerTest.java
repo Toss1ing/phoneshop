@@ -69,7 +69,6 @@ class CartPageControllerTest {
 
     @Test
     void testUpdateCartStockException() {
-        // Создаем Cart с 1 товаром
         Cart cart = new Cart();
         CartItem cartItem = new CartItem();
         Phone phone = new Phone();
