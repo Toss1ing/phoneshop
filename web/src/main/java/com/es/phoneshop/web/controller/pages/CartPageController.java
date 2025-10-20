@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
-@RequestMapping("/cart")
+@RequestMapping(value = "/cart")
 public class CartPageController {
 
     @Resource
