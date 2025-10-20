@@ -13,6 +13,7 @@ public class CartView {
 
     @NotNull
     private Map<Long,
+            @NotNull(message = "Quantity must not be null")
             @Min(value = 1, message = "Quantity must be at least 1")
             @Max(value = Short.MAX_VALUE, message = "Very large quantity")
                     Integer> items = new HashMap<>();
