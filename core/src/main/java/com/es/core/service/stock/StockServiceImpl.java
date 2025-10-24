@@ -15,6 +15,7 @@ public class StockServiceImpl implements StockService {
     @Resource
     private StockDao stockDao;
 
+    @Transactional(propagation = Propagation.REQUIRED)
     @Override
     public void reservePhone(Long phoneId, int quantity) {
         boolean isRowUpdated = stockDao.updateReservedByPhoneId(phoneId, quantity);
@@ -24,6 +25,7 @@ public class StockServiceImpl implements StockService {
         }
     }
 
+    @Transactional(propagation = Propagation.REQUIRED)
     @Override
     public void decreaseReservedQuantity(Long phoneId, int quantity) {
         boolean isRowUpdated = stockDao.decreaseReservedByPhoneId(phoneId, quantity);
@@ -33,7 +35,7 @@ public class StockServiceImpl implements StockService {
         }
     }
 
-    @Transactional(propagation = Propagation.MANDATORY)
+    @Transactional(propagation = Propagation.REQUIRED)
     @Override
     public void reserveAndValidateItems(Map<Long, Integer> items) {
         int[] updatedRows = stockDao.updateReservedItems(items);

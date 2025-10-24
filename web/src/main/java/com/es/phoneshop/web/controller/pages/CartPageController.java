@@ -73,7 +73,6 @@ public class CartPageController {
                     CART_VIEW_ATTRIBUTE,
                     cartView
             );
-            return REDIRECT_CART_PAGE;
         }
 
         return REDIRECT_CART_PAGE;

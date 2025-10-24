@@ -7,7 +7,6 @@ import com.es.core.model.phone.Phone;
 import com.es.core.service.phone.PhoneService;
 import com.es.core.service.stock.StockService;
 import com.es.core.util.ExceptionMessage;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
@@ -35,13 +34,7 @@ public class HttpSessionCartService implements CartService {
 
     @Override
     public Cart getCart() {
-
-        sessionLock.readLock().lock();
-        try {
-            return new Cart(cart);
-        } finally {
-            sessionLock.readLock().unlock();
-        }
+        return new Cart(cart);
     }
 
     @Override
@@ -66,7 +59,6 @@ public class HttpSessionCartService implements CartService {
         }
     }
 
-    @Transactional
     @Override
     public void update(Map<Long, Integer> items) {
         sessionLock.writeLock().lock();
@@ -93,6 +85,11 @@ public class HttpSessionCartService implements CartService {
 
         try {
             CartItem cartItem = getCartItemByPhoneId(phoneId);
+
+            if (cartItem == null) {
+                throw new NotFoundException(ExceptionMessage.CART_ITEM_NOT_FOUND);
+            }
+
             cart.getItems().remove(cartItem);
 
             Long phoneIdToDelete = cartItem.getPhone().getId();
@@ -113,11 +110,16 @@ public class HttpSessionCartService implements CartService {
                 .sum();
 
         BigDecimal totalPrice = cart.getItems().stream()
-                .map(cartItem -> cartItem
-                        .getPhone()
-                        .getPrice()
-                        .multiply(BigDecimal.valueOf(cartItem.getQuantity()))
-                ).reduce(BigDecimal.ZERO, BigDecimal::add);
+                .map(cartItem -> {
+                    if (cartItem.getPhone().getPrice() == null) {
+                        return BigDecimal.ZERO;
+                    }
+                    return cartItem.getPhone()
+                            .getPrice()
+                            .multiply(BigDecimal.valueOf(cartItem.getQuantity()));
+                })
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
 
         cart.setTotalPrice(totalPrice);
         cart.setTotalQuantity(totalQuantity);
@@ -186,6 +188,5 @@ public class HttpSessionCartService implements CartService {
         }
         return cartItem;
     }
-
 
 }
