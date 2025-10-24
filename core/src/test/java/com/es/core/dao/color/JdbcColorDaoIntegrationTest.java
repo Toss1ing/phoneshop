@@ -104,13 +104,6 @@ public class JdbcColorDaoIntegrationTest {
         assertTrue(map.isEmpty(), "Map should be empty when no phone IDs passed");
     }
 
-
-    private void clearTables() {
-        jdbcTemplate.update("DELETE FROM phone2color");
-        jdbcTemplate.update("DELETE FROM colors");
-        jdbcTemplate.update("DELETE FROM phones");
-    }
-
     private Long insertPhone(String brand, String model, int price) {
         jdbcTemplate.update("INSERT INTO phones (brand, model, price) VALUES (?, ?, ?)", brand, model, price);
         return jdbcTemplate.queryForObject("SELECT id FROM phones WHERE brand=? AND model=?", Long.class, brand, model);

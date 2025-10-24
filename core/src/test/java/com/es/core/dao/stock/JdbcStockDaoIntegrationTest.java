@@ -1,6 +1,5 @@
 package com.es.core.dao.stock;
 
-import com.es.core.model.phone.Stock;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -10,10 +9,9 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
+import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 @Transactional
 @ExtendWith(SpringExtension.class)
@@ -40,68 +38,119 @@ public class JdbcStockDaoIntegrationTest {
         insertPhone(phoneId1, "Apple", "iPhone 14", 1000);
         insertPhone(phoneId2, "Samsung", "Galaxy S23", 1200);
 
-        insertStock(phoneId1, 10, 2);
-        insertStock(phoneId2, 5, 1);
+        insertStock(phoneId1, 10, 0);
+        insertStock(phoneId2, 5, 0);
     }
 
     @Test
-    void testGetStockByPhoneIdExistingPhone() {
-        Optional<Stock> stockOpt = jdbcStockDao.getStockByPhoneId(phoneId1);
+    void testUpdateReservedByPhoneId() {
+        boolean updated = jdbcStockDao.updateReservedByPhoneId(phoneId1, 3);
+        assertTrue(updated, "Reserved quantity should be updated");
 
-        assertTrue(stockOpt.isPresent(), "Stock should be present");
-        Stock stock = stockOpt.get();
-        assertEquals(phoneId1, stock.getPhone().getId());
-        assertEquals(10, stock.getStock());
-        assertEquals(2, stock.getReserved());
+        Integer reserved = getReserved(phoneId1);
+        assertEquals(3, reserved, "Reserved should be set to 3");
     }
 
     @Test
-    void testGetStockByPhoneIdAnotherPhone() {
-        Optional<Stock> stockOpt = jdbcStockDao.getStockByPhoneId(phoneId2);
+    void testUpdateReservedItemsBatch() {
+        var items = Map.of(
+                phoneId1, 4,
+                phoneId2, 2
+        );
 
-        assertTrue(stockOpt.isPresent(), "Stock should be present");
-        Stock stock = stockOpt.get();
-        assertEquals(phoneId2, stock.getPhone().getId());
-        assertEquals(5, stock.getStock());
-        assertEquals(1, stock.getReserved());
+        int[] results = jdbcStockDao.updateReservedItems(items);
+        assertEquals(2, results.length, "Should update 2 items");
+
+        assertEquals(4, getReserved(phoneId1));
+        assertEquals(2, getReserved(phoneId2));
     }
 
     @Test
-    void testGetStockByPhoneIdNotExistingPhone() {
-        Optional<Stock> stockOpt = jdbcStockDao.getStockByPhoneId(999L);
-        assertTrue(stockOpt.isEmpty(), "Stock should be empty for non-existing phone");
+    void testDecreaseReservedByPhoneId() {
+        jdbcStockDao.updateReservedByPhoneId(phoneId1, 5);
+
+        boolean decreased = jdbcStockDao.decreaseReservedByPhoneId(phoneId1, 3);
+        assertTrue(decreased, "Reserved quantity should be decreased");
+
+        assertEquals(2, getReserved(phoneId1), "Reserved should be decreased to 2");
     }
 
     @Test
-    void testStockValuesCanBeUpdated() {
-        updateStock(phoneId1, 20, 5);
+    void testUpdateReservedByPhoneIdFailsIfNotEnoughStock() {
+        boolean updated = jdbcStockDao.updateReservedByPhoneId(phoneId1, 15);
+        assertFalse(updated, "Update should fail because not enough stock");
 
-        Optional<Stock> stockOpt = jdbcStockDao.getStockByPhoneId(phoneId1);
-        assertTrue(stockOpt.isPresent());
-        Stock stock = stockOpt.get();
-        assertEquals(20, stock.getStock());
-        assertEquals(5, stock.getReserved());
+        assertEquals(0, getReserved(phoneId1), "Reserved should remain unchanged");
+    }
+
+    @Test
+    void testDecreaseReservedByPhoneIdFailsIfReservedTooLow() {
+        boolean decreased = jdbcStockDao.decreaseReservedByPhoneId(phoneId1, 5);
+        assertFalse(decreased, "Decrease should fail because reserved is too low");
+
+        assertEquals(0, getReserved(phoneId1), "Reserved should remain unchanged");
+    }
+
+    @Test
+    void testDecreaseReservedByPhoneIdToZero() {
+        jdbcStockDao.updateReservedByPhoneId(phoneId1, 5);
+
+        boolean decreased = jdbcStockDao.decreaseReservedByPhoneId(phoneId1, 5);
+        assertTrue(decreased, "Reserved quantity should be decreased to zero");
+
+        Integer reserved = getReserved(phoneId1);
+        assertEquals(0, reserved, "Reserved should now be 0");
+    }
+
+    @Test
+    void testDecreaseReservedByPhoneIdPartial() {
+        jdbcStockDao.updateReservedByPhoneId(phoneId1, 7);
+
+        boolean decreased = jdbcStockDao.decreaseReservedByPhoneId(phoneId1, 3);
+        assertTrue(decreased, "Reserved quantity should be decreased partially");
+
+        Integer reserved = getReserved(phoneId1);
+        assertEquals(4, reserved, "Reserved should now be 4");
+    }
+
+    @Test
+    void testDecreaseReservedByPhoneIdFailsIfOverDecrease() {
+        jdbcStockDao.updateReservedByPhoneId(phoneId1, 2);
+
+        boolean decreased = jdbcStockDao.decreaseReservedByPhoneId(phoneId1, 5);
+        assertFalse(decreased, "Decrease should fail because reserved is too low");
+
+        Integer reserved = getReserved(phoneId1);
+        assertEquals(2, reserved, "Reserved should remain unchanged");
     }
 
 
     private void insertPhone(Long id, String brand, String model, int price) {
         jdbcTemplate.update(
                 "INSERT INTO phones (id, brand, model, price) VALUES (?, ?, ?, ?)",
-                id, brand, model, price
+                id,
+                brand,
+                model,
+                price
         );
     }
 
     private void insertStock(Long phoneId, int stock, int reserved) {
         jdbcTemplate.update(
                 "INSERT INTO stocks (phoneId, stock, reserved) VALUES (?, ?, ?)",
-                phoneId, stock, reserved
+                phoneId,
+                stock,
+                reserved
         );
     }
 
-    private void updateStock(Long phoneId, int stock, int reserved) {
-        jdbcTemplate.update(
-                "UPDATE stocks SET stock = ?, reserved = ? WHERE phoneId = ?",
-                stock, reserved, phoneId
+    private Integer getReserved(Long phoneId) {
+        return jdbcTemplate.queryForObject(
+                "SELECT reserved FROM stocks WHERE phoneId = ?",
+                Integer.class,
+                phoneId
         );
     }
+
+
 }

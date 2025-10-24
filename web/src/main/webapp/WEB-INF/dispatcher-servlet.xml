@@ -11,6 +11,8 @@
     <mvc:resources mapping="/resources/**" location="/resources/" />
     <mvc:view-controller path="/" view-name="forward:/index.jsp"/>
 
+    <bean class="org.springframework.web.context.request.RequestContextListener"/>
+
     <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
         <property name="prefix" value="/WEB-INF/pages/" />
         <property name="suffix" value=".jsp" />

@@ -1,6 +1,6 @@
 package com.es.phoneshop.web.controller.pages;
 
-import com.es.core.exception.OutOfStockException;
+import com.es.core.exception.StockException;
 import com.es.core.service.order.OrderService;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Controller;
@@ -13,13 +13,10 @@ public class OrderPageController {
     @Resource
     private OrderService orderService;
 
-    @RequestMapping(method = RequestMethod.GET)
-    public void getOrder() throws OutOfStockException {
-        orderService.createOrder(null);
-    }
+    private final static String ORDER_PAGE = "orderPage";
 
-    @RequestMapping(method = RequestMethod.POST)
-    public void placeOrder() throws OutOfStockException {
-        orderService.placeOrder(null);
+    @RequestMapping(method = RequestMethod.GET)
+    public String getOrder() throws StockException {
+        return ORDER_PAGE;
     }
 }

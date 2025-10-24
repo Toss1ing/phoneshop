@@ -41,7 +41,8 @@ public class ProductListPageController {
             @RequestParam(required = false) String sortField,
             @RequestParam(required = false) String sortOrder,
             @RequestParam(required = false) String search,
-            Model model) {
+            Model model
+    ) {
 
         Pageable pageable = new Pageable(
                 validatePage(page),
@@ -52,7 +53,6 @@ public class ProductListPageController {
 
         String validateSearch = validateSearch(search);
         Page<PhoneDto> phones = phoneService.findAllPhones(pageable, validateSearch);
-
 
         model.addAttribute(PHONES_ATTRIBUTE_NAME, phones.content());
         model.addAttribute(CURRENT_PAGE_ATTRIBUTE_NAME, page);

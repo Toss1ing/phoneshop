@@ -36,7 +36,6 @@ public class JdbcPhoneDaoIntegrationTest {
 
     @BeforeEach
     void setup() {
-        clearTables();
         insertPhone(1L, "Apple", "iPhone 14", 1000);
         insertColor(1L, "BLACK");
         linkPhoneColor(1L, 1L);

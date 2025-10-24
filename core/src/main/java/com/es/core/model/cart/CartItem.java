@@ -4,12 +4,12 @@ import com.es.core.model.phone.Phone;
 
 public class CartItem {
     private Phone phone;
-    private Long quantity;
+    private Integer quantity;
 
     public CartItem() {
     }
 
-    public CartItem(Phone phone, Long quantity) {
+    public CartItem(Phone phone, Integer quantity) {
         this.phone = phone;
         this.quantity = quantity;
     }
@@ -18,15 +18,15 @@ public class CartItem {
         return phone;
     }
 
-    public Long getQuantity() {
+    public Integer getQuantity() {
         return quantity;
     }
 
-    public void setPhones(Phone phone) {
+    public void setPhone(Phone phone) {
         this.phone = phone;
     }
 
-    public void setQuantity(Long quantity) {
+    public void setQuantity(Integer quantity) {
         this.quantity = quantity;
     }
 

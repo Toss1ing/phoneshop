@@ -1,11 +1,12 @@
 package com.es.core.dao.stock;
 
-import com.es.core.model.phone.Stock;
-
-import java.util.Optional;
+import java.util.Map;
 
 public interface StockDao {
 
-    Optional<Stock> getStockByPhoneId(Long phoneId);
+    boolean updateReservedByPhoneId(Long phoneId, int reserve);
 
+    boolean decreaseReservedByPhoneId(Long phoneId, int quantity);
+
+    int[] updateReservedItems(Map<Long, Integer> items);
 }

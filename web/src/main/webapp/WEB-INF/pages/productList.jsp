@@ -28,7 +28,7 @@
     </div>
     <c:if test="${empty phones}">
         <div class="d-flex justify-content-center align-items-center" style="height: 50px;">
-            <h4 class="text-muted">Телефоны не найдены</h4>
+            <h4 class="text-muted">Phones not founded</h4>
         </div>
     </c:if>
 
@@ -67,29 +67,35 @@
             <c:forEach var="phone" items="${phones}">
                 <tr class="text-center">
                     <td style="width: 120px;">
-                        <img src="https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/${phone.imageUrl}"
-                             alt="${phone.model}" class="img-fluid rounded" style="max-height: 100px;">
+                        <a href="${pageContext.request.contextPath}/productDetails/${phone.id}">
+                            <img src="https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/${phone.imageUrl}"
+                                 alt="${phone.model}" class="img-fluid rounded" style="max-height: 100px;">
+                        </a>
                     </td>
                     <td>${phone.brand}</td>
                     <td>${phone.model}</td>
-                    <td>$ <fmt:formatNumber value="${phone.price}" type="number" minFractionDigits="2"/></td>
+                    <td><fmt:formatNumber value="${phone.price}" type="number" minFractionDigits="2"/></td>
                     <td>
                         <c:forEach var="color" items="${phone.colors}" varStatus="loop">
-                            ${color.code}<c:if test="${!loop.last}">, </c:if>
+                            ${color.code}
+                            <c:if test="${!loop.last}">,</c:if>
                         </c:forEach>
                     </td>
                     <td>${phone.displaySizeInches}"</td>
                     <td style="width: 100px;">
-                        <input class="form-control form-control-sm text-center quantity-input"
-                               name="quantity_${phone.id}" value="1">
+                        <label>
+                            <input class="form-control form-control-sm text-center quantity-input"
+                                   name="quantity_${phone.id}" value="1">
+                        </label>
                     </td>
-                    <td style="width: 130px;">
+                    <td>
                         <button class="btn btn-outline-primary btn-sm add-to-cart-btn" data-phone-id="${phone.id}">
                             Add to Cart
                         </button>
                     </td>
                 </tr>
             </c:forEach>
+
             </tbody>
         </table>
 
@@ -161,5 +167,6 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
 </body>
 </html>
