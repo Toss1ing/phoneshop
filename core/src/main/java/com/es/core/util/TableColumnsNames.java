@@ -32,5 +32,21 @@ public final class TableColumnsNames {
 
         public static final String RESERVED_QUANTITY = "quantity";
     }
+
+    public static final class Order {
+        private Order() {
+        }
+
+        public static final String SECURE_ID = "secureId";
+    }
+
+    public static final class OrderItem {
+        private OrderItem() {
+        }
+
+        public static final String ORDER_ID = "orderId";
+        public static final String PHONE_ID = "phoneId";
+        public static final String QUANTITY = "quantity";
+    }
 }
 

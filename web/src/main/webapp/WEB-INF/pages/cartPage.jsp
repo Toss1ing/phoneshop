@@ -17,6 +17,8 @@
         <h3 class="mb-4">Cart</h3>
     </div>
 
+    <a href="/phoneshop-web/productList" class="btn btn-outline-secondary mb-4">Back to product list</a>
+
     <c:if test="${empty cartView.cart.items}">
         <div class="text-center text-muted">Your cart is empty</div>
     </c:if>
@@ -26,7 +28,7 @@
     </c:if>
 
     <c:if test="${not empty cartView.cart.items}">
-        <%--@elvariable id="cartView" type="com.es.core.dto.CartView"--%>
+        <%--@elvariable id="cartView" type="com.es.core.dto.cart.CartView"--%>
         <form:form modelAttribute="cartView" method="post" action="/phoneshop-web/cart">
             <input type="hidden" name="_method" value="put"/>
 
@@ -76,7 +78,7 @@
                 </tbody>
             </table>
 
-            <div class="d-flex justify-content-end gap-2 mt-3">
+            <div class="d-flex justify-content-end gap-2 mt-3 mb-4">
                 <button type="submit" class="btn btn-outline-primary">Update</button>
                 <a href="/phoneshop-web/order" class="btn btn-outline-success">Order</a>
             </div>

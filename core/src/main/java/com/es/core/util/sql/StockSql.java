@@ -23,4 +23,16 @@ public final class StockSql {
                 WHERE phoneId = :phoneId AND reserved >= :quantity
             """;
 
+    public static final String DECREASE_STOCK_BY_PHONE_ID = """
+                UPDATE stocks
+                SET stock = stock - :quantity
+                WHERE phoneId = :phoneId AND stock >= 0
+            """;
+
+    public static final String CLEAN_UP_RESERVED_CART_ITEMS = """
+                UPDATE stocks
+                SET reserved = reserved - :quantity
+                WHERE phoneId = :phoneId
+            """;
+
 }

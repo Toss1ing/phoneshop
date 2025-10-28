@@ -1,4 +1,4 @@
-package com.es.core.dto;
+package com.es.core.dto.cart;
 
 import com.es.core.model.cart.Cart;
 import jakarta.validation.constraints.Max;
