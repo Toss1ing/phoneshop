@@ -1,6 +1,7 @@
 package com.es.core.dao.color;
 
 import com.es.core.model.color.Color;
+import com.es.core.util.TableColumnsNames;
 import org.springframework.jdbc.core.RowMapper;
 
 import java.sql.ResultSet;
@@ -12,8 +13,11 @@ public class ColorRowMapper implements RowMapper<Color> {
     public Color mapRow(ResultSet rs, int rowNum) throws SQLException {
         Color color = new Color();
 
-        Long id = getNullableLong(rs, hasColumn(rs, "colorId") ? "colorId" : "id");
-        String code = rs.getString(hasColumn(rs, "colorCode") ? "colorCode" : "code");
+        Long id = getNullableLong(rs, hasColumn(rs, TableColumnsNames.Color.COLOR_ID) ?
+                TableColumnsNames.Color.COLOR_ID
+                : TableColumnsNames.ID);
+        String code = rs.getString(hasColumn(rs, TableColumnsNames.Color.COLOR_CODE) ?
+                TableColumnsNames.Color.COLOR_CODE : TableColumnsNames.Color.CODE);
 
         color.setId(id);
         color.setCode(code);

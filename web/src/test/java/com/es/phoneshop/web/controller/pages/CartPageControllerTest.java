@@ -1,6 +1,6 @@
 package com.es.phoneshop.web.controller.pages;
 
-import com.es.core.dto.CartView;
+import com.es.core.dto.cart.CartView;
 import com.es.core.exception.StockException;
 import com.es.core.model.cart.Cart;
 import com.es.core.model.cart.CartItem;
@@ -50,7 +50,7 @@ class CartPageControllerTest {
     void testGetCartDoesNotAddCartViewIfPresent() {
         when(model.containsAttribute("cartView")).thenReturn(true);
 
-        String view = controller.getCart(model);
+        String view = controller.getCart();
 
         assertEquals("cartPage", view);
         verify(model, never()).addAttribute(eq("cartView"), any());

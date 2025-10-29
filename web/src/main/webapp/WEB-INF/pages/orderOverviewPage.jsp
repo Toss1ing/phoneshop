@@ -1,12 +1,11 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Order</title>
+    <title>Order Overview</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
 </head>
 <body class="bg-light">
@@ -15,18 +14,13 @@
 
 <div class="container mt-5 pt-3">
     <div class="d-flex align-items-left mt-4 mb-2">
-        <h3 class="mb-4">Order</h3>
+        <h3 class="mb-4">Thanks for your order</h3>
     </div>
 
-    <a href="/phoneshop-web/cart" class="btn btn-outline-secondary mb-4">Back to cart</a>
-
-    <c:if test="${empty order.orderItems}">
-        <div class="text-center text-muted">Your order is empty</div>
-    </c:if>
-
-    <c:if test="${not empty error}">
-        <div class="text-center text-danger">${error}</div>
-    </c:if>
+    <div class="d-flex justify-content-between mb-4">
+        <a href="/phoneshop-web/productList" class="btn btn-outline-secondary">Back to products</a>
+        <span class="text-muted">Order secure-ID: <strong>${order.secureId}</strong></span>
+    </div>
 
     <div class="table-responsive">
         <table class="table table-bordered table-striped text-center mb-0">
@@ -76,47 +70,16 @@
         </table>
     </div>
 
-
-    <%--@elvariable id="userPersonalInfo" type="com.es.core.dto.order.UserPersonalInfoDto"--%>
-    <form:form method="post" modelAttribute="userPersonalInfo" class="mt-4" action="/phoneshop-web/order">
-        <div class="row g-1">
-
-            <div class="col-md-6">
-                <label class="form-label">First name*</label>
-                <form:input path="firstName" cssClass="form-control" placeholder="Kirill"/>
-                <form:errors path="firstName" cssClass="text-danger small"/>
-            </div>
-
-            <div class="col-md-6">
-                <label class="form-label">Last name*</label>
-                <form:input path="lastName" cssClass="form-control" placeholder="Borisenko"/>
-                <form:errors path="lastName" cssClass="text-danger small"/>
-            </div>
-
-            <div class="col-12">
-                <label class="form-label">Address*</label>
-                <form:input path="deliveryAddress" cssClass="form-control" placeholder="Esenina street 35/1"/>
-                <form:errors path="deliveryAddress" cssClass="text-danger small"/>
-            </div>
-
-            <div class="col-md-6">
-                <label class="form-label">Phone*</label>
-                <form:input path="contactPhoneNo" cssClass="form-control" placeholder="+xxxxxxxxxxxx"/>
-                <form:errors path="contactPhoneNo" cssClass="text-danger small"/>
-            </div>
-
-            <div class="col-12">
-                <label class="form-label">Additional information</label>
-                <form:textarea path="additionalInformation" cssClass="form-control" rows="3"/>
-                <form:errors path="additionalInformation" cssClass="text-danger small"/>
-            </div>
-
-            <div class="col-12 mt-3 mb-4">
-                <button type="submit" class="btn btn-outline-success px-4">Order</button>
-            </div>
-
+    <div class="card mt-4 shadow-sm">
+        <div class="card-body">
+            <h5 class="card-title mb-3">Delivery details</h5>
+            <p><strong>First name:</strong> ${order.firstName}</p>
+            <p><strong>Last name:</strong> ${order.lastName}</p>
+            <p><strong>Address:</strong> ${order.deliveryAddress}</p>
+            <p><strong>Phone:</strong> ${order.contactPhoneNo}</p>
+            <p><strong>Additional information</strong> ${order.additionalInformation}</p>
         </div>
-    </form:form>
+    </div>
 </div>
 
 </body>

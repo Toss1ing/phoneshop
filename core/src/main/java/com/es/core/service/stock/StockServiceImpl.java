@@ -43,6 +43,20 @@ public class StockServiceImpl implements StockService {
         validateUpdateResult(items, updatedRows);
     }
 
+    @Transactional(propagation = Propagation.REQUIRED)
+    @Override
+    public void decreaseStock(Map<Long, Integer> items) {
+        int[] updatedRows = stockDao.decreaseStock(items);
+
+        validateUpdateResult(items, updatedRows);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    @Override
+    public void cleanUpReserved(Map<Long, Integer> items) {
+        stockDao.cleanUpReserved(items);
+    }
+
     private void validateUpdateResult(Map<Long, Integer> items, int[] updatedRows) {
         Map<Long, String> errors = new HashMap<>();
         int i = 0;

@@ -9,6 +9,9 @@
 
     <context:component-scan base-package="com.es.core"/>
 
+    <bean id="exceptionLoggingAspect" class="com.es.core.aspect.ExceptionLoggingAspect"/>
+    <aop:aspectj-autoproxy proxy-target-class="true"/>
+
     <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
         <property name="driverClassName" value="${db.driver}"/>
         <property name="url" value="${db.url}"/>
@@ -35,15 +38,21 @@
     <bean id="phoneRowMapper" class="com.es.core.dao.phone.PhoneRowMapper"/>
     <bean id="colorRowMapper" class="com.es.core.dao.color.ColorRowMapper"/>
     <bean id="stockRowMapper" class="com.es.core.dao.stock.StockRowMapper"/>
+    <bean id="orderItemRowMapper" class="com.es.core.dao.orderItem.OrderItemRowMapper"/>
+    <bean id="orderRowMapper" class="com.es.core.dao.order.OrderRowMapper"/>
 
     <bean id="jdbcPhoneDao" class="com.es.core.dao.phone.JdbcPhoneDao"/>
     <bean id="jdbcColorDao" class="com.es.core.dao.color.JdbcColorDao"/>
     <bean id="jdbcStockDao" class="com.es.core.dao.stock.JdbcStockDao"/>
+    <bean id="jdbcOrderItemDao" class="com.es.core.dao.orderItem.JdbcOrderItemDao"/>
+    <bean id="jdbcOrderDao" class="com.es.core.dao.order.JdbcOrderDao"/>
 
     <bean id="phoneServiceImpl" class="com.es.core.service.phone.PhoneServiceImpl"/>
-    <bean id="httpSessionCartService" class="com.es.core.service.cart.HttpSessionCartService" scope="session">
+    <bean id="httpSessionCartService" class="com.es.core.service.cart.HttpSessionCartService"
+          scope="session" destroy-method="cleanupSessionAndReservedItems">
         <aop:scoped-proxy proxy-target-class="false"/>
     </bean>
     <bean id="stockServiceImpl" class="com.es.core.service.stock.StockServiceImpl"/>
+    <bean id="orderServiceImpl" class="com.es.core.service.order.OrderServiceImpl"/>
 
 </beans>

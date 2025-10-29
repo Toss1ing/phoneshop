@@ -30,11 +30,7 @@ public class JdbcStockDao implements StockDao {
 
     @Override
     public int[] updateReservedItems(Map<Long, Integer> items) {
-        MapSqlParameterSource[] params = items.entrySet().stream()
-                .map(mapEntry -> new MapSqlParameterSource()
-                        .addValue(TableColumnsNames.Phone.PHONE_ID, mapEntry.getKey())
-                        .addValue(TableColumnsNames.Stock.RESERVED_QUANTITY, mapEntry.getValue())
-                ).toArray(MapSqlParameterSource[]::new);
+        MapSqlParameterSource[] params = getParamsToUpdateReserveAndStock(items);
 
         return namedParameterJdbcTemplate.batchUpdate(
                 StockSql.UPDATE_RESERVED_WHERE_STOCK_AVAILABLE_BY_PHONE_ID,
@@ -54,6 +50,33 @@ public class JdbcStockDao implements StockDao {
         );
 
         return updatedRowsCount > 0;
+    }
+
+    @Override
+    public int[] decreaseStock(Map<Long, Integer> items) {
+
+        MapSqlParameterSource[] params = getParamsToUpdateReserveAndStock(items);
+
+        return namedParameterJdbcTemplate.batchUpdate(
+                StockSql.DECREASE_STOCK_BY_PHONE_ID,
+                params
+        );
+    }
+
+    @Override
+    public void cleanUpReserved(Map<Long, Integer> items) {
+
+        MapSqlParameterSource[] params = getParamsToUpdateReserveAndStock(items);
+
+        namedParameterJdbcTemplate.batchUpdate(StockSql.CLEAN_UP_RESERVED_CART_ITEMS, params);
+    }
+
+    private MapSqlParameterSource[] getParamsToUpdateReserveAndStock(Map<Long, Integer> items) {
+        return items.entrySet().stream()
+                .map(mapEntry -> new MapSqlParameterSource()
+                        .addValue(TableColumnsNames.Phone.PHONE_ID, mapEntry.getKey())
+                        .addValue(TableColumnsNames.Stock.RESERVED_QUANTITY, mapEntry.getValue())
+                ).toArray(MapSqlParameterSource[]::new);
     }
 
 }

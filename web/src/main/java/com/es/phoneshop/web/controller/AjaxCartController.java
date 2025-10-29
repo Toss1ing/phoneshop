@@ -1,6 +1,6 @@
 package com.es.phoneshop.web.controller;
 
-import com.es.core.dto.AddPhoneToCartRequest;
+import com.es.core.dto.cart.AddPhoneToCartRequest;
 import com.es.core.model.cart.Cart;
 import com.es.core.service.cart.CartService;
 import jakarta.annotation.Resource;

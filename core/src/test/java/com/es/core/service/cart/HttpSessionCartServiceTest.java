@@ -118,6 +118,37 @@ class HttpSessionCartServiceTest {
         assertEquals(cart1.getTotalPrice(), cart2.getTotalPrice());
     }
 
+    @Test
+    void testCleanupReservedWhenCartIsEmptyShouldNotCallStockService() {
+        cartService.cleanupSessionAndReservedItems();
+
+        verify(stockService, never()).cleanUpReserved(any());
+
+        assertTrue(cartService.getCart().getItems().isEmpty());
+        assertEquals(0, cartService.getCart().getTotalQuantity());
+        assertEquals(BigDecimal.ZERO, cartService.getCart().getTotalPrice());
+    }
+
+    @Test
+    void testCleanupReservedWhenCartHasItemsShouldCallStockServiceAndClearCart() {
+        when(phoneService.findPhoneById(1L)).thenReturn(phone1);
+
+        cartService.addPhone(1L, 2);
+
+        CartItem item = cartService.getCart().getItems().get(0);
+
+        assertFalse(cartService.getCart().getItems().isEmpty());
+        assertEquals(2, item.getQuantity());
+
+        cartService.cleanupSessionAndReservedItems();
+
+        verify(stockService).cleanUpReserved(Map.of(1L, 2));
+
+        assertTrue(cartService.getCart().getItems().isEmpty());
+        assertEquals(0, cartService.getCart().getTotalQuantity());
+        assertEquals(BigDecimal.ZERO, cartService.getCart().getTotalPrice());
+    }
+
     private Phone createPhone(BigDecimal price) {
         Phone phone = new Phone();
         phone.setId(1L);

@@ -124,6 +124,49 @@ public class JdbcStockDaoIntegrationTest {
         assertEquals(2, reserved, "Reserved should remain unchanged");
     }
 
+    @Test
+    void testDecreaseStockBatch() {
+        jdbcStockDao.updateReservedByPhoneId(phoneId1, 0);
+        jdbcStockDao.updateReservedByPhoneId(phoneId2, 0);
+
+        var items = Map.of(
+                phoneId1, 3,
+                phoneId2, 2
+        );
+
+        int[] results = jdbcStockDao.decreaseStock(items);
+        assertEquals(2, results.length, "Should update 2 items");
+
+        Integer stock1 = jdbcTemplate.queryForObject(
+                "SELECT stock FROM stocks WHERE phoneId = ?", Integer.class, phoneId1
+        );
+        Integer stock2 = jdbcTemplate.queryForObject(
+                "SELECT stock FROM stocks WHERE phoneId = ?", Integer.class, phoneId2
+        );
+
+        assertEquals(7, stock1, "Stock for phoneId1 should decrease by 3");
+        assertEquals(3, stock2, "Stock for phoneId2 should decrease by 2");
+    }
+
+    @Test
+    void testCleanUpReservedBatch() {
+        jdbcStockDao.updateReservedByPhoneId(phoneId1, 4);
+        jdbcStockDao.updateReservedByPhoneId(phoneId2, 2);
+
+        var reservedItems = Map.of(
+                phoneId1, 4,
+                phoneId2, 2
+        );
+
+        assertDoesNotThrow(() -> jdbcStockDao.cleanUpReserved(reservedItems));
+
+        Integer reserved1 = getReserved(phoneId1);
+        Integer reserved2 = getReserved(phoneId2);
+
+        assertEquals(0, reserved1, "Reserved for phoneId1 should be reset to 0");
+        assertEquals(0, reserved2, "Reserved for phoneId2 should be reset to 0");
+    }
+
 
     private void insertPhone(Long id, String brand, String model, int price) {
         jdbcTemplate.update(
@@ -151,6 +194,5 @@ public class JdbcStockDaoIntegrationTest {
                 phoneId
         );
     }
-
 
 }
