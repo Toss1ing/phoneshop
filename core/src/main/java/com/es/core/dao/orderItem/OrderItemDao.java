@@ -6,6 +6,6 @@ import java.util.List;
 
 public interface OrderItemDao {
 
-    void saveOrderItemsByOrderId(Long orderId, List<OrderItem> orderItems);
+    int[] saveOrderItemsByOrderId(Long orderId, List<OrderItem> orderItems);
 
 }

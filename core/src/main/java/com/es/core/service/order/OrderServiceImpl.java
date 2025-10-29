@@ -7,6 +7,7 @@ import com.es.core.dto.order.UserPersonalInfoDto;
 import com.es.core.exception.CartChangedException;
 import com.es.core.exception.NotFoundException;
 import com.es.core.exception.NotValidDataException;
+import com.es.core.exception.OrderItemException;
 import com.es.core.model.cart.Cart;
 import com.es.core.model.color.Color;
 import com.es.core.model.order.Order;
@@ -56,9 +57,7 @@ public class OrderServiceImpl implements OrderService {
             return new Order();
         }
 
-        List<OrderItem> orderItems = cart.getItems().stream()
-                .map(ci -> new OrderItem(ci.getPhone(), ci.getQuantity()))
-                .toList();
+        List<OrderItem> orderItems = getOrderItemsByCart(cart);
 
         Order order = new Order();
         order.setOrderItems(orderItems);
@@ -82,6 +81,9 @@ public class OrderServiceImpl implements OrderService {
 
         order.setSecureId(UUID.randomUUID().toString());
 
+        orderDao.saveOrder(order);
+        saveAndValidateOrderItems(order);
+
         Map<Long, Integer> phoneIdToQuantity = order.getOrderItems().stream()
                 .collect(Collectors.toMap(orderItem ->
                                 orderItem.getPhone().getId(),
@@ -89,9 +91,6 @@ public class OrderServiceImpl implements OrderService {
                 );
 
         stockService.decreaseStock(phoneIdToQuantity);
-
-        orderDao.saveOrder(order);
-        orderItemDao.saveOrderItemsByOrderId(order.getId(), order.getOrderItems());
 
         cartService.cleanupSessionAndReservedItems();
     }
@@ -134,9 +133,11 @@ public class OrderServiceImpl implements OrderService {
     private void validateCartConsistency(Order order) {
         Cart cart = cartService.getCart();
 
-        List<OrderItem> cartItems = cart.getItems().stream()
-                .map(ci -> new OrderItem(ci.getPhone(), ci.getQuantity()))
-                .toList();
+        if (cart == null || cart.getItems() == null || cart.getItems().isEmpty()) {
+            throw new CartChangedException(ExceptionMessage.CART_CHANGED_MESSAGE);
+        }
+
+        List<OrderItem> cartItems = getOrderItemsByCart(cart);
 
         if (!order.getOrderItems().equals(cartItems)) {
             throw new CartChangedException(ExceptionMessage.CART_CHANGED_MESSAGE);
@@ -150,4 +151,21 @@ public class OrderServiceImpl implements OrderService {
         order.setContactPhoneNo(userPersonalInfoDto.getContactPhoneNo());
         order.setAdditionalInformation(userPersonalInfoDto.getAdditionalInformation());
     }
+
+    private void saveAndValidateOrderItems(Order order) {
+        int[] updatedRow = orderItemDao.saveOrderItemsByOrderId(order.getId(), order.getOrderItems());
+
+        for (int row : updatedRow) {
+            if (row == 0) {
+                throw new OrderItemException(ExceptionMessage.ORDER_ITEM_INSERT_EXCEPTION);
+            }
+        }
+    }
+
+    private List<OrderItem> getOrderItemsByCart(Cart cart) {
+        return cart.getItems().stream()
+                .map(ci -> new OrderItem(ci.getPhone(), ci.getQuantity()))
+                .toList();
+    }
+    
 }

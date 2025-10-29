@@ -1,6 +1,7 @@
 package com.es.core.dao.order;
 
 import com.es.core.model.order.Order;
+import com.es.core.util.ExceptionMessage;
 import com.es.core.util.TableColumnsNames;
 import com.es.core.util.sql.OrderSql;
 import jakarta.annotation.Resource;
@@ -20,12 +21,13 @@ public class JdbcOrderDao implements OrderDao {
 
     @Override
     public void saveOrder(Order order) {
+        Objects.requireNonNull(order, ExceptionMessage.ORDER_EMPTY_MESSAGE);
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         BeanPropertySqlParameterSource params = new BeanPropertySqlParameterSource(order);
 
         namedParameterJdbcTemplate.update(
-                OrderSql.INSERT_ORDER_ITEM,
+                OrderSql.INSERT_ORDER,
                 params,
                 keyHolder,
                 new String[]{TableColumnsNames.ID}

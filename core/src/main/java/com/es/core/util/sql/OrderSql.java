@@ -2,7 +2,7 @@ package com.es.core.util.sql;
 
 public class OrderSql {
 
-    public static final String INSERT_ORDER_ITEM = """
+    public static final String INSERT_ORDER = """
             INSERT INTO orders (
                     secureId, subtotal,
                     deliveryPrice,

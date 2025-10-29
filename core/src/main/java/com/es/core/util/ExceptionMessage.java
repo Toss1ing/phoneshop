@@ -16,5 +16,6 @@ public final class ExceptionMessage {
 
     public static final String ORDER_EMPTY_MESSAGE = "Order must not be empty";
     public static final String ORDER_BY_SECURE_ID_NOT_FOUND = "Order by secureId '%s' not found";
+    public static final String ORDER_ITEM_INSERT_EXCEPTION = "Error during insert order item in database";
 
 }

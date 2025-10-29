@@ -15,20 +15,20 @@ public class JdbcOrderItemDao implements OrderItemDao {
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
     @Override
-    public void saveOrderItemsByOrderId(Long orderId, List<OrderItem> orderItems) {
+    public int[] saveOrderItemsByOrderId(Long orderId, List<OrderItem> orderItems) {
         if (orderItems == null || orderItems.isEmpty()) {
-            return;
+            return new int[0];
         }
 
         MapSqlParameterSource[] params = orderItems.stream()
                 .map(orderItem -> new MapSqlParameterSource()
                         .addValue(TableColumnsNames.OrderItem.ORDER_ID, orderId)
-                        .addValue(TableColumnsNames.OrderItem.PHONE_ID, orderItem.getPhone().getId())
+                        .addValue(TableColumnsNames.Phone.PHONE_ID, orderItem.getPhone().getId())
                         .addValue(TableColumnsNames.OrderItem.QUANTITY, orderItem.getQuantity())
                 )
                 .toArray(MapSqlParameterSource[]::new);
 
-        namedParameterJdbcTemplate.batchUpdate(
+        return namedParameterJdbcTemplate.batchUpdate(
                 OrderItemSql.INSERT_ORDER_ITEM,
                 params
         );
