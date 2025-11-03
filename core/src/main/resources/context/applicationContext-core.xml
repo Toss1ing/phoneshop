@@ -39,7 +39,9 @@
     <bean id="colorRowMapper" class="com.es.core.dao.color.ColorRowMapper"/>
     <bean id="stockRowMapper" class="com.es.core.dao.stock.StockRowMapper"/>
     <bean id="orderItemRowMapper" class="com.es.core.dao.orderItem.OrderItemRowMapper"/>
+    <bean id="orderExtractor" class="com.es.core.dao.order.OrderExtractor"/>
     <bean id="orderRowMapper" class="com.es.core.dao.order.OrderRowMapper"/>
+
 
     <bean id="jdbcPhoneDao" class="com.es.core.dao.phone.JdbcPhoneDao"/>
     <bean id="jdbcColorDao" class="com.es.core.dao.color.JdbcColorDao"/>

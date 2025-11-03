@@ -1,7 +1,10 @@
 package com.es.core.service.order;
 
+import com.es.core.dao.color.ColorDao;
 import com.es.core.dao.order.OrderDao;
 import com.es.core.dao.orderItem.OrderItemDao;
+import com.es.core.dao.pagination.Page;
+import com.es.core.dao.pagination.Pageable;
 import com.es.core.dto.order.UserPersonalInfoDto;
 import com.es.core.exception.CartChangedException;
 import com.es.core.exception.NotFoundException;
@@ -22,6 +25,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -41,6 +45,9 @@ class OrderServiceImplTest {
 
     @Mock
     private OrderDao orderDao;
+
+    @Mock
+    private ColorDao colorDao;
 
     @Mock
     private OrderItemDao orderItemDao;
@@ -95,6 +102,15 @@ class OrderServiceImplTest {
         cart.setTotalPrice(BigDecimal.valueOf(2000));
 
         when(cartService.getCart()).thenReturn(cart);
+
+        doAnswer(invocation -> {
+            Order o = invocation.getArgument(0);
+            o.setId(1L);
+            return null;
+        }).when(orderDao).saveOrder(any(Order.class));
+
+        when(orderItemDao.saveOrderItemsByOrderId(anyLong(), anyList())).thenReturn(new int[]{1});
+        when(colorDao.findColorsForPhoneIds(anyList())).thenReturn(Map.of());
 
         Order order = orderService.createOrder();
 
@@ -164,6 +180,69 @@ class OrderServiceImplTest {
 
         assertThrows(NotFoundException.class, () ->
                 orderService.getOrderBySecureId(secureId)
+        );
+    }
+
+    @Test
+    void testFindAllOrdersDelegatesToDao() {
+        Page<Order> page = new Page<>(List.of(), 0, 10, 0);
+
+        when(orderDao.findAllOrders(any(Pageable.class))).thenReturn(page);
+
+        Page<Order> result = orderService.findAllOrders(0, 10);
+
+        assertEquals(page, result);
+        verify(orderDao).findAllOrders(any(Pageable.class));
+    }
+
+    @Test
+    void testGetOrderByIdReturnsOrder() {
+        Long id = 1L;
+        Order order = new Order();
+        order.setId(id);
+        order.setOrderItems(List.of(new OrderItem(phone, 1)));
+
+        when(orderDao.findOrderById(id)).thenReturn(Optional.of(order));
+
+        Order result = orderService.getOrderById(id);
+
+        assertEquals(order, result);
+        verify(orderDao).findOrderById(id);
+    }
+
+    @Test
+    void testGetOrderByIdThrowsExceptionWhenNull() {
+        assertThrows(NotValidDataException.class, () ->
+                orderService.getOrderById(null)
+        );
+        verify(orderDao, never()).findOrderById(any());
+    }
+
+    @Test
+    void testGetOrderByIdThrowsExceptionWhenNotFound() {
+        when(orderDao.findOrderById(1L)).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class, () ->
+                orderService.getOrderById(1L)
+        );
+    }
+
+    @Test
+    void testUpdateOrderStatusSuccessfully() {
+        when(orderDao.updateOrderStatus(1L, OrderStatus.DELIVERED)).thenReturn(1);
+
+        assertDoesNotThrow(() ->
+                orderService.updateOrderStatus(1L, OrderStatus.DELIVERED)
+        );
+        verify(orderDao).updateOrderStatus(1L, OrderStatus.DELIVERED);
+    }
+
+    @Test
+    void testUpdateOrderStatusThrowsNotFoundWhenZeroRows() {
+        when(orderDao.updateOrderStatus(1L, OrderStatus.NEW)).thenReturn(0);
+
+        assertThrows(NotFoundException.class, () ->
+                orderService.updateOrderStatus(1L, OrderStatus.NEW)
         );
     }
 }

@@ -108,8 +108,8 @@ public class JdbcPhoneDao implements PhoneDao {
 
         return new Page<>(
                 phones,
-                pageable.page(),
-                pageable.size(),
+                pageable.getPage(),
+                pageable.getSize(),
                 totalElements
         );
     }
@@ -128,7 +128,7 @@ public class JdbcPhoneDao implements PhoneDao {
         }
 
         if (!isCount) {
-            String orderBy = resolveSortOption(pageable.sortField()) + " " + pageable.sortOrder();
+            String orderBy = resolveSortOption(pageable.getSortField()) + " " + pageable.getSortOrder();
             sql.append(orderBy);
 
             sql.append(PhoneSql.PAGINATION);
@@ -144,8 +144,8 @@ public class JdbcPhoneDao implements PhoneDao {
         }
 
         if (!isCount) {
-            int offset = pageable.page() * pageable.size();
-            params.addValue(SqlParams.LIMIT, pageable.size());
+            int offset = pageable.getPage() * pageable.getSize();
+            params.addValue(SqlParams.LIMIT, pageable.getSize());
             params.addValue(SqlParams.OFFSET, offset);
         }
 

@@ -32,8 +32,8 @@ public class PhoneServiceImpl implements PhoneService {
         if (phonesPage.content().isEmpty()) {
             return new Page<>(
                     List.of(),
-                    pageable.page(),
-                    pageable.size(),
+                    pageable.getPage(),
+                    pageable.getSize(),
                     0L
             );
         }
