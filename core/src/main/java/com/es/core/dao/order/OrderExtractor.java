@@ -10,8 +10,6 @@ import org.springframework.jdbc.core.ResultSetExtractor;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 
 public class OrderExtractor implements ResultSetExtractor<Optional<Order>> {
@@ -24,16 +22,12 @@ public class OrderExtractor implements ResultSetExtractor<Optional<Order>> {
 
     @Override
     public Optional<Order> extractData(ResultSet rs) throws SQLException {
-        Map<Long, Order> orderMap = new HashMap<>();
+        Order order = null;
 
         while (rs.next()) {
-            Long orderId = rs.getLong(TableColumnsNames.ID);
-            Order order = orderMap.get(orderId);
-
             if (order == null) {
                 order = OrderMapperUtil.mapBaseOrder(rs);
                 order.setOrderItems(new ArrayList<>());
-                orderMap.put(orderId, order);
             }
 
             long orderItemId = rs.getLong(TableColumnsNames.OrderItem.ORDER_ITEM_ID);
@@ -43,7 +37,8 @@ public class OrderExtractor implements ResultSetExtractor<Optional<Order>> {
             }
         }
 
-        return orderMap.values().stream().findFirst();
+        return Optional.ofNullable(order);
     }
+
 
 }
