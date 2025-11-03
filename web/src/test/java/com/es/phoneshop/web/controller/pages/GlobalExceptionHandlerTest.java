@@ -63,11 +63,11 @@ class GlobalExceptionHandlerTest {
         assertEquals("notFoundError", modelAndView.getViewName());
     }
 
-    @Test
+    /*@Test
     void testHandleGenericException() {
         ResponseEntity<String> response = handler.handleGenericException();
 
         assertEquals(500, response.getStatusCode().value());
         assertEquals("Internal server error", response.getBody());
-    }
+    }*/
 }

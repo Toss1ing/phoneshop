@@ -88,4 +88,45 @@ class StockServiceImplTest {
         StockException exception = assertThrows(StockException.class, () -> stockService.reserveAndValidateItems(items));
         assertEquals(2, exception.getErrors().size());
     }
+
+    @Test
+    void testDecreaseStockSuccess() {
+        Map<Long, Integer> items = Map.of(1L, 2, 2L, 3);
+        when(stockDao.decreaseStock(items)).thenReturn(new int[]{1, 1});
+
+        assertDoesNotThrow(() -> stockService.decreaseStock(items));
+        verify(stockDao).decreaseStock(items);
+    }
+
+    @Test
+    void testDecreaseStockPartialFailure() {
+        Map<Long, Integer> items = new LinkedHashMap<>();
+        items.put(1L, 2);
+        items.put(2L, 3);
+        when(stockDao.decreaseStock(items)).thenReturn(new int[]{1, 0});
+
+        StockException exception = assertThrows(StockException.class, () -> stockService.decreaseStock(items));
+        assertTrue(exception.getErrors().containsKey(2L));
+        assertEquals("Out of stock", exception.getErrors().get(2L));
+    }
+
+    @Test
+    void testDecreaseStockAllFail() {
+        Map<Long, Integer> items = Map.of(1L, 2, 2L, 3);
+        when(stockDao.decreaseStock(items)).thenReturn(new int[]{0, 0});
+
+        StockException exception = assertThrows(StockException.class, () -> stockService.decreaseStock(items));
+        assertEquals(2, exception.getErrors().size());
+    }
+
+    @Test
+    void testCleanUpReserved() {
+        Map<Long, Integer> items = Map.of(1L, 2, 2L, 3);
+
+        doNothing().when(stockDao).cleanUpReserved(items);
+
+        assertDoesNotThrow(() -> stockService.cleanUpReserved(items));
+        verify(stockDao).cleanUpReserved(items);
+    }
+
 }

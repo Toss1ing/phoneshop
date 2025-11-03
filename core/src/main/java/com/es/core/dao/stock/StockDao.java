@@ -9,4 +9,9 @@ public interface StockDao {
     boolean decreaseReservedByPhoneId(Long phoneId, int quantity);
 
     int[] updateReservedItems(Map<Long, Integer> items);
+
+    int[] decreaseStock(Map<Long, Integer> items);
+
+    void cleanUpReserved(Map<Long, Integer> items);
+
 }

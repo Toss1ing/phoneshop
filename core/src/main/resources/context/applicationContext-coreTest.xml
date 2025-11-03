@@ -10,7 +10,7 @@
 
     <context:property-placeholder location="classpath:conf/application-test.properties"/>
 
-    <context:component-scan base-package="com.es.core"/>
+    <context:component-scan base-package="com.es.core.dao"/>
 
     <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
         <property name="driverClassName" value="${db.driver}"/>
@@ -28,7 +28,7 @@
     </bean>
 
     <bean id="namedParameterJdbcTemplate" class="org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate">
-        <constructor-arg ref="jdbcTemplate"/>
+        <constructor-arg ref="dataSource"/>
     </bean>
 
     <jdbc:initialize-database enabled="${db.insertSchema}" data-source="dataSource">
@@ -43,4 +43,7 @@
 
     <bean id="stockRowMapper" class="com.es.core.dao.stock.StockRowMapper"/>
     <bean id="jdbcStockDao" class="com.es.core.dao.stock.JdbcStockDao"/>
+
+    <bean id="jdbcOrderItemDao" class="com.es.core.dao.orderItem.JdbcOrderItemDao"/>
+    <bean id="jdbcOrderDao" class="com.es.core.dao.order.JdbcOrderDao"/>
 </beans>

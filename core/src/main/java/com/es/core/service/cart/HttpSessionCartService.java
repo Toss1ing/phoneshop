@@ -104,6 +104,25 @@ public class HttpSessionCartService implements CartService {
         }
     }
 
+    @Override
+    public void cleanupSessionAndReservedItems() {
+        if (cart.getItems().isEmpty()) {
+            return;
+        }
+
+        Map<Long, Integer> reservedItems = cart.getItems().stream()
+                .collect(Collectors.toMap(
+                        item -> item.getPhone().getId(),
+                        CartItem::getQuantity
+                ));
+
+        cart.getItems().clear();
+        cart.setTotalPrice(BigDecimal.ZERO);
+        cart.setTotalQuantity(0);
+
+        stockService.cleanUpReserved(reservedItems);
+    }
+
     private void recalculateCart() {
         long totalQuantity = cart.getItems().stream()
                 .mapToLong(CartItem::getQuantity)

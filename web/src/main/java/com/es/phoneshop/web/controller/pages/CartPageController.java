@@ -1,12 +1,11 @@
 package com.es.phoneshop.web.controller.pages;
 
-import com.es.core.dto.CartView;
+import com.es.core.dto.cart.CartView;
 import com.es.core.exception.StockException;
 import com.es.core.service.cart.CartService;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,14 +30,13 @@ public class CartPageController {
 
     private static final String ITEM_FIELD_TEMPLATE = "items[%d]";
 
+    @ModelAttribute(CART_VIEW_ATTRIBUTE)
+    public CartView initCartView() {
+        return new CartView(cartService.getCart());
+    }
+
     @RequestMapping(method = RequestMethod.GET)
-    public String getCart(Model model) {
-        if (!model.containsAttribute(CART_VIEW_ATTRIBUTE)) {
-            model.addAttribute(
-                    CART_VIEW_ATTRIBUTE,
-                    new CartView(cartService.getCart())
-            );
-        }
+    public String getCart() {
         return CART_PAGE;
     }
 
@@ -55,7 +53,7 @@ public class CartPageController {
         } catch (StockException ex) {
             ex.getErrors().forEach((phoneId, message) ->
                     bindingResult.rejectValue(
-                            String.format(ITEM_FIELD_TEMPLATE,phoneId),
+                            String.format(ITEM_FIELD_TEMPLATE, phoneId),
                             OUT_OF_STOCK_CODE,
                             message
                     )

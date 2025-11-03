@@ -2,6 +2,7 @@ package com.es.core.dao.stock;
 
 import com.es.core.model.phone.Phone;
 import com.es.core.model.phone.Stock;
+import com.es.core.util.TableColumnsNames;
 import org.springframework.jdbc.core.RowMapper;
 
 import java.sql.ResultSet;
@@ -14,11 +15,11 @@ public class StockRowMapper implements RowMapper<Stock> {
         Stock stock = new Stock();
 
         Phone phone = new Phone();
-        phone.setId(getNullableLong(rs, "phoneId"));
+        phone.setId(getNullableLong(rs, TableColumnsNames.Phone.PHONE_ID));
         stock.setPhone(phone);
 
-        stock.setStock(getNullableInteger(rs, "stock"));
-        stock.setReserved(getNullableInteger(rs, "reserved"));
+        stock.setStock(getNullableInteger(rs, TableColumnsNames.Stock.STOCK));
+        stock.setReserved(getNullableInteger(rs, TableColumnsNames.Stock.RESERVED));
 
         return stock;
     }
