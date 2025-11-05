@@ -8,7 +8,6 @@ import com.es.core.model.phone.Phone;
 import com.es.core.util.TableColumnsNames;
 import com.es.core.util.sql.PhoneSql;
 import com.es.core.util.sql.SqlParams;
-import jakarta.annotation.Resource;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -24,14 +23,19 @@ import java.util.Optional;
 
 public class JdbcPhoneDao implements PhoneDao {
 
-    @Resource
-    private PhoneRowMapper phoneRowMapper;
+    private final PhoneRowMapper phoneRowMapper;
+    private final ColorRowMapper colorRowMapper;
+    private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
-    @Resource
-    ColorRowMapper colorRowMapper;
-
-    @Resource
-    private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+    public JdbcPhoneDao(
+            NamedParameterJdbcTemplate namedParameterJdbcTemplate,
+            ColorRowMapper colorRowMapper,
+            PhoneRowMapper phoneRowMapper
+    ) {
+        this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
+        this.colorRowMapper = colorRowMapper;
+        this.phoneRowMapper = phoneRowMapper;
+    }
 
     @Override
     public Optional<Phone> get(final Long key) {

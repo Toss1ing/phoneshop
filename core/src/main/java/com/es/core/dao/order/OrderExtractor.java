@@ -10,9 +10,8 @@ import org.springframework.jdbc.core.ResultSetExtractor;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Optional;
 
-public class OrderExtractor implements ResultSetExtractor<Optional<Order>> {
+public class OrderExtractor implements ResultSetExtractor<Order> {
 
     private final OrderItemRowMapper orderItemRowMapper;
 
@@ -21,7 +20,7 @@ public class OrderExtractor implements ResultSetExtractor<Optional<Order>> {
     }
 
     @Override
-    public Optional<Order> extractData(ResultSet rs) throws SQLException {
+    public Order extractData(ResultSet rs) throws SQLException {
         Order order = null;
 
         while (rs.next()) {
@@ -37,7 +36,7 @@ public class OrderExtractor implements ResultSetExtractor<Optional<Order>> {
             }
         }
 
-        return Optional.ofNullable(order);
+        return order;
     }
 
 

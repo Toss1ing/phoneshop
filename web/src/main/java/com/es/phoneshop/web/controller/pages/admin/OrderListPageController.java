@@ -7,7 +7,6 @@ import com.es.core.model.order.Order;
 import com.es.core.model.order.OrderStatus;
 import com.es.core.service.order.OrderService;
 import com.es.core.util.ExceptionMessage;
-import jakarta.annotation.Resource;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,8 +22,11 @@ import java.util.Arrays;
 @RequestMapping(value = "/admin/orders")
 public class OrderListPageController {
 
-    @Resource
-    private OrderService orderService;
+    private final OrderService orderService;
+
+    public OrderListPageController(final OrderService orderService) {
+        this.orderService = orderService;
+    }
 
     private static final String ORDER_LIST_ATTRIBUTE = "orders";
     private static final String ORDER_ATTRIBUTE = "order";

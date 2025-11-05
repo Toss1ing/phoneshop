@@ -8,7 +8,6 @@ import com.es.core.util.ExceptionMessage;
 import com.es.core.util.TableColumnsNames;
 import com.es.core.util.sql.OrderSql;
 import com.es.core.util.sql.SqlParams;
-import jakarta.annotation.Resource;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -21,14 +20,19 @@ import java.util.Optional;
 
 public class JdbcOrderDao implements OrderDao {
 
-    @Resource
-    private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+    private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+    private final OrderExtractor orderExtractor;
+    private final OrderRowMapper orderRowMapper;
 
-    @Resource
-    private OrderExtractor orderExtractor;
-
-    @Resource
-    private OrderRowMapper orderRowMapper;
+    public JdbcOrderDao(
+            NamedParameterJdbcTemplate namedParameterJdbcTemplate,
+            OrderExtractor orderExtractor,
+            OrderRowMapper orderRowMapper
+    ) {
+        this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
+        this.orderExtractor = orderExtractor;
+        this.orderRowMapper = orderRowMapper;
+    }
 
     @Override
     public void saveOrder(Order order) {
@@ -53,11 +57,11 @@ public class JdbcOrderDao implements OrderDao {
 
         MapSqlParameterSource params = new MapSqlParameterSource(TableColumnsNames.Order.SECURE_ID, secureId);
 
-        return Objects.requireNonNull(namedParameterJdbcTemplate.query(
+        return Optional.ofNullable(namedParameterJdbcTemplate.query(
                 OrderSql.SELECT_ORDER_BY_SECURE_ID,
                 params,
                 orderExtractor
-        )).stream().findFirst();
+        ));
     }
 
     @Override
@@ -65,11 +69,11 @@ public class JdbcOrderDao implements OrderDao {
 
         MapSqlParameterSource params = new MapSqlParameterSource(TableColumnsNames.ID, orderId);
 
-        return Objects.requireNonNull(namedParameterJdbcTemplate.query(
+        return Optional.ofNullable(namedParameterJdbcTemplate.query(
                 OrderSql.SELECT_ORDER_BY_ID,
                 params,
                 orderExtractor
-        )).stream().findFirst();
+        ));
     }
 
     @Override

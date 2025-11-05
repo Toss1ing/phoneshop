@@ -14,10 +14,7 @@ public class OrderMapperUtil {
     public static Order mapBaseOrder(ResultSet rs) throws SQLException {
         Order order = new Order();
 
-        Long idColumn = getNullableLong(rs, hasColumn(rs, TableColumnsNames.Order.ORDER_ID) ?
-                TableColumnsNames.Order.ORDER_ID
-                : TableColumnsNames.ID);
-        order.setId(idColumn);
+        order.setId(getNullableLong(rs, TableColumnsNames.Order.ORDER_ID));
         order.setSecureId(rs.getString(TableColumnsNames.Order.SECURE_ID));
         order.setSubtotal(rs.getBigDecimal(TableColumnsNames.Order.SUBTOTAL));
         order.setDeliveryPrice(rs.getBigDecimal(TableColumnsNames.Order.DELIVERY_PRICE));
@@ -41,14 +38,5 @@ public class OrderMapperUtil {
     private static Long getNullableLong(ResultSet rs, String columnName) throws SQLException {
         long value = rs.getLong(columnName);
         return rs.wasNull() ? null : value;
-    }
-
-    private static boolean hasColumn(ResultSet rs, String columnName) {
-        try {
-            rs.findColumn(columnName);
-            return true;
-        } catch (SQLException e) {
-            return false;
-        }
     }
 }

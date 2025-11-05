@@ -18,7 +18,6 @@ import com.es.core.model.order.OrderStatus;
 import com.es.core.service.cart.CartService;
 import com.es.core.service.stock.StockService;
 import com.es.core.util.ExceptionMessage;
-import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,20 +33,24 @@ import java.util.stream.Collectors;
 @Service
 public class OrderServiceImpl implements OrderService {
 
-    @Resource
-    private StockService stockService;
+    private final StockService stockService;
+    private final CartService cartService;
+    private final OrderItemDao orderItemDao;
+    private final OrderDao orderDao;
+    private final ColorDao colorDao;
 
-    @Resource
-    private CartService cartService;
-
-    @Resource
-    private OrderItemDao orderItemDao;
-
-    @Resource
-    private OrderDao orderDao;
-
-    @Resource
-    private ColorDao colorDao;
+    public OrderServiceImpl(
+            StockService stockService,
+            CartService cartService,
+            OrderItemDao orderItemDao,
+            OrderDao orderDao,
+            ColorDao colorDao) {
+        this.stockService = stockService;
+        this.cartService = cartService;
+        this.orderItemDao = orderItemDao;
+        this.orderDao = orderDao;
+        this.colorDao = colorDao;
+    }
 
     @Value("${delivery.price}")
     BigDecimal deliveryPrice;

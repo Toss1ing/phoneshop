@@ -2,7 +2,6 @@ package com.es.phoneshop.web.controller.pages;
 
 import com.es.core.model.phone.Phone;
 import com.es.core.service.phone.PhoneService;
-import jakarta.annotation.Resource;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,8 +12,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @RequestMapping(value = "/productDetails")
 public class ProductDetailsPageController {
 
-    @Resource
-    private PhoneService phoneService;
+    private final PhoneService phoneService;
+
+    public ProductDetailsPageController(PhoneService phoneService) {
+        this.phoneService = phoneService;
+    }
 
     private static final String PRODUCT_DETAILS_PAGE_NAME = "productDetails";
 

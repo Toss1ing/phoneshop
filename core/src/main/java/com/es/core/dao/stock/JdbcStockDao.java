@@ -2,7 +2,6 @@ package com.es.core.dao.stock;
 
 import com.es.core.util.TableColumnsNames;
 import com.es.core.util.sql.StockSql;
-import jakarta.annotation.Resource;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
@@ -11,8 +10,11 @@ import java.util.Map;
 
 public class JdbcStockDao implements StockDao {
 
-    @Resource
-    private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+    private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+
+    public JdbcStockDao(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
+        this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
+    }
 
     @Override
     public boolean updateReservedByPhoneId(Long phoneId, int quantity) {

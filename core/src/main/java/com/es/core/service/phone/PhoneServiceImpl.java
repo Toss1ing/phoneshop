@@ -10,7 +10,6 @@ import com.es.core.exception.NotValidDataException;
 import com.es.core.model.color.Color;
 import com.es.core.model.phone.Phone;
 import com.es.core.util.ExceptionMessage;
-import jakarta.annotation.Resource;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -19,11 +18,16 @@ import java.util.Set;
 
 public class PhoneServiceImpl implements PhoneService {
 
-    @Resource
-    private PhoneDao phoneDao;
+    private final PhoneDao phoneDao;
+    private final ColorDao colorDao;
 
-    @Resource
-    private ColorDao colorDao;
+    public PhoneServiceImpl(
+            PhoneDao phoneDao,
+            ColorDao colorDao
+    ) {
+        this.phoneDao = phoneDao;
+        this.colorDao = colorDao;
+    }
 
     @Override
     public Page<PhoneDto> findAllPhones(Pageable pageable, String search) {

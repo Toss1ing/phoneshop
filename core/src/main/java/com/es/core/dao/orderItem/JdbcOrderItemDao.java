@@ -3,7 +3,6 @@ package com.es.core.dao.orderItem;
 import com.es.core.model.order.OrderItem;
 import com.es.core.util.TableColumnsNames;
 import com.es.core.util.sql.OrderItemSql;
-import jakarta.annotation.Resource;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
@@ -11,8 +10,11 @@ import java.util.List;
 
 public class JdbcOrderItemDao implements OrderItemDao {
 
-    @Resource
-    private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+    private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+
+    public JdbcOrderItemDao(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
+        this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
+    }
 
     @Override
     public int[] saveOrderItemsByOrderId(Long orderId, List<OrderItem> orderItems) {

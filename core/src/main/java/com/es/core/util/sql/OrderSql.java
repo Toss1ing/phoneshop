@@ -3,7 +3,20 @@ package com.es.core.util.sql;
 public class OrderSql {
 
     public static final String SELECT_ORDERS = """
-                SELECT * FROM orders
+                SELECT
+                    id AS orderId,
+                    secureId,
+                    subtotal,
+                    deliveryPrice,
+                    totalPrice,
+                    firstName,
+                    lastName,
+                    deliveryAddress,
+                    contactPhoneNo,
+                    status,
+                    additionalInformation
+                FROM orders
+                ORDER BY id ASC
                 LIMIT :limit OFFSET :offset
             """;
 
