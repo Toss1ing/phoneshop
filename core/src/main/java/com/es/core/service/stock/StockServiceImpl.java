@@ -3,7 +3,6 @@ package com.es.core.service.stock;
 import com.es.core.dao.stock.StockDao;
 import com.es.core.exception.StockException;
 import com.es.core.util.ExceptionMessage;
-import jakarta.annotation.Resource;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,8 +11,11 @@ import java.util.Map;
 
 public class StockServiceImpl implements StockService {
 
-    @Resource
-    private StockDao stockDao;
+    private final StockDao stockDao;
+
+    public StockServiceImpl(StockDao stockDao) {
+        this.stockDao = stockDao;
+    }
 
     @Transactional(propagation = Propagation.REQUIRED)
     @Override

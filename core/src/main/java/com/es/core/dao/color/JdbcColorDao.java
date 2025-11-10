@@ -4,7 +4,6 @@ import com.es.core.model.color.Color;
 import com.es.core.util.TableColumnsNames;
 import com.es.core.util.sql.ColorSql;
 import com.es.core.util.sql.SqlParams;
-import jakarta.annotation.Resource;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,11 +18,16 @@ import java.util.stream.Collectors;
 
 public class JdbcColorDao implements ColorDao {
 
-    @Resource
-    private ColorRowMapper colorRowMapper;
+    private final ColorRowMapper colorRowMapper;
+    private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
-    @Resource
-    private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+    public JdbcColorDao(
+            ColorRowMapper colorRowMapper,
+            NamedParameterJdbcTemplate namedParameterJdbcTemplate
+    ) {
+        this.colorRowMapper = colorRowMapper;
+        this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
+    }
 
     @Override
     public Map<Long, Set<Color>> findColorsForPhoneIds(List<Long> phoneIds) {

@@ -4,7 +4,6 @@ import com.es.core.dao.pagination.Page;
 import com.es.core.dao.pagination.Pageable;
 import com.es.core.dto.PhoneDto;
 import com.es.core.service.phone.PhoneService;
-import jakarta.annotation.Resource;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,8 +13,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Controller
 @RequestMapping(value = "/productList")
 public class ProductListPageController {
-    @Resource
-    private PhoneService phoneService;
+
+    private final PhoneService phoneService;
+
+    public ProductListPageController(PhoneService phoneService) {
+        this.phoneService = phoneService;
+    }
 
     private static final String ID_NAME = "id";
     private static final String BRAND_NAME = "brand";

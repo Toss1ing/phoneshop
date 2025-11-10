@@ -3,11 +3,18 @@ package com.es.core.util.sql;
 public final class ColorSql {
 
     public static final String SELECT_COLORS_BY_COLOR_CODES = """
-                SELECT * FROM colors WHERE code IN (:colorsCode)
+                SELECT
+                    id as colorId,
+                    code as colorCode,
+                    name
+                FROM colors WHERE code IN (:colorsCode)
             """;
 
     public static final String SELECT_COLORS_BY_PHONE_IDS = """
-                SELECT pc.phoneId, c.id, c.code
+                SELECT
+                    pc.phoneId,
+                    c.id as colorId,
+                    c.code as colorCode
                 FROM phone2color pc
                 JOIN colors c ON pc.colorId = c.id
                 WHERE pc.phoneId IN (:phoneIds)

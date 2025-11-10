@@ -3,6 +3,8 @@ package com.es.core.service.order;
 import com.es.core.dao.color.ColorDao;
 import com.es.core.dao.order.OrderDao;
 import com.es.core.dao.orderItem.OrderItemDao;
+import com.es.core.dao.pagination.Page;
+import com.es.core.dao.pagination.Pageable;
 import com.es.core.dto.order.UserPersonalInfoDto;
 import com.es.core.exception.CartChangedException;
 import com.es.core.exception.NotFoundException;
@@ -16,7 +18,6 @@ import com.es.core.model.order.OrderStatus;
 import com.es.core.service.cart.CartService;
 import com.es.core.service.stock.StockService;
 import com.es.core.util.ExceptionMessage;
-import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,20 +33,24 @@ import java.util.stream.Collectors;
 @Service
 public class OrderServiceImpl implements OrderService {
 
-    @Resource
-    private StockService stockService;
+    private final StockService stockService;
+    private final CartService cartService;
+    private final OrderItemDao orderItemDao;
+    private final OrderDao orderDao;
+    private final ColorDao colorDao;
 
-    @Resource
-    private CartService cartService;
-
-    @Resource
-    private OrderItemDao orderItemDao;
-
-    @Resource
-    private OrderDao orderDao;
-
-    @Resource
-    private ColorDao colorDao;
+    public OrderServiceImpl(
+            StockService stockService,
+            CartService cartService,
+            OrderItemDao orderItemDao,
+            OrderDao orderDao,
+            ColorDao colorDao) {
+        this.stockService = stockService;
+        this.cartService = cartService;
+        this.orderItemDao = orderItemDao;
+        this.orderDao = orderDao;
+        this.colorDao = colorDao;
+    }
 
     @Value("${delivery.price}")
     BigDecimal deliveryPrice;
@@ -102,18 +107,7 @@ public class OrderServiceImpl implements OrderService {
                         String.format(ExceptionMessage.ORDER_BY_SECURE_ID_NOT_FOUND, secureId)
                 ));
 
-        List<Long> phoneId = order.getOrderItems().stream()
-                .map(orderItem ->
-                        orderItem.getPhone().getId()
-                ).toList();
-
-        if (!phoneId.isEmpty()) {
-            Map<Long, Set<Color>> colorsMap = colorDao.findColorsForPhoneIds(phoneId);
-
-            order.getOrderItems().forEach(orderItem -> {
-                orderItem.getPhone().setColors(colorsMap.getOrDefault(orderItem.getPhone().getId(), Set.of()));
-            });
-        }
+        addColorToOrderItems(order);
 
         return order;
     }
@@ -128,6 +122,57 @@ public class OrderServiceImpl implements OrderService {
         return newDraft != null &&
                 newDraft.getOrderItems() != null &&
                 Objects.equals(newDraft.getOrderItems(), draft.getOrderItems());
+    }
+
+    @Override
+    public Page<Order> findAllOrders(int page, int size) {
+        return orderDao.findAllOrders(
+                new Pageable(
+                        page,
+                        size
+                ));
+    }
+
+    @Override
+    public Order getOrderById(Long orderId) {
+        if (orderId == null) {
+            throw new NotValidDataException(ExceptionMessage.ORDER_ID_IS_NULL);
+        }
+
+        Order order = orderDao.findOrderById(orderId)
+                .orElseThrow(() -> new NotFoundException(
+                        String.format(ExceptionMessage.ORDER_BY_ID_NOT_FOUND, orderId)
+                ));
+
+        addColorToOrderItems(order);
+
+        return order;
+    }
+
+    @Override
+    public void updateOrderStatus(Long orderId, OrderStatus orderStatus) {
+        int updateRowsCount = orderDao.updateOrderStatus(orderId, orderStatus);
+
+        if (updateRowsCount == 0) {
+            throw new NotFoundException(
+                    String.format(ExceptionMessage.ORDER_BY_ID_NOT_FOUND, orderId)
+            );
+        }
+    }
+
+    private void addColorToOrderItems(Order order) {
+        List<Long> phoneId = order.getOrderItems().stream()
+                .map(orderItem ->
+                        orderItem.getPhone().getId()
+                ).toList();
+
+        if (!phoneId.isEmpty()) {
+            Map<Long, Set<Color>> colorsMap = colorDao.findColorsForPhoneIds(phoneId);
+
+            order.getOrderItems().forEach(orderItem -> {
+                orderItem.getPhone().setColors(colorsMap.getOrDefault(orderItem.getPhone().getId(), Set.of()));
+            });
+        }
     }
 
     private void validateCartConsistency(Order order) {
@@ -167,5 +212,5 @@ public class OrderServiceImpl implements OrderService {
                 .map(ci -> new OrderItem(ci.getPhone(), ci.getQuantity()))
                 .toList();
     }
-    
+
 }

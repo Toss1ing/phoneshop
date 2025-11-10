@@ -46,4 +46,6 @@
 
     <bean id="jdbcOrderItemDao" class="com.es.core.dao.orderItem.JdbcOrderItemDao"/>
     <bean id="jdbcOrderDao" class="com.es.core.dao.order.JdbcOrderDao"/>
+    <bean id="orderExtractor" class="com.es.core.dao.order.OrderExtractor"/>
+    <bean id="orderRowMapper" class="com.es.core.dao.order.OrderRowMapper"/>
 </beans>

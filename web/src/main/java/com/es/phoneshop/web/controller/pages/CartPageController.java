@@ -3,7 +3,6 @@ package com.es.phoneshop.web.controller.pages;
 import com.es.core.dto.cart.CartView;
 import com.es.core.exception.StockException;
 import com.es.core.service.cart.CartService;
-import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
@@ -17,8 +16,11 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @RequestMapping(value = "/cart")
 public class CartPageController {
 
-    @Resource
-    private CartService cartService;
+    private final CartService cartService;
+
+    public CartPageController(CartService cartService) {
+        this.cartService = cartService;
+    }
 
     private static final String CART_PAGE = "cartPage";
     private static final String REDIRECT_CART_PAGE = "redirect:/cart";

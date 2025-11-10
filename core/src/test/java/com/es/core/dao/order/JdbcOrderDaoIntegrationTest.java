@@ -1,5 +1,6 @@
 package com.es.core.dao.order;
 
+import com.es.core.dao.pagination.Pageable;
 import com.es.core.model.order.Order;
 import com.es.core.model.order.OrderItem;
 import com.es.core.model.order.OrderStatus;
@@ -73,6 +74,68 @@ public class JdbcOrderDaoIntegrationTest {
         Optional<Order> result = jdbcOrderDao.findOrderBySecureId("nonexistent");
         assertTrue(result.isEmpty(), "Optional should be empty when order not found");
     }
+
+    @Test
+    void testFindOrderByIdReturnsOrder() {
+        Long orderId = insertTestOrder("secure789");
+        insertOrderItem(orderId, phoneId, 1);
+
+        Optional<Order> optionalOrder = jdbcOrderDao.findOrderById(orderId);
+
+        assertTrue(optionalOrder.isPresent(), "Order should be found by ID");
+        Order order = optionalOrder.get();
+        assertEquals(orderId, order.getId());
+        assertEquals("secure789", order.getSecureId());
+        assertEquals(OrderStatus.NEW, order.getStatus());
+        assertNotNull(order.getOrderItems(), "Order should have items");
+        assertEquals(1, order.getOrderItems().size());
+    }
+
+
+    @Test
+    void testFindOrderByIdReturnsEmptyWhenNotExists() {
+        Optional<Order> result = jdbcOrderDao.findOrderById(999999L);
+        assertTrue(result.isEmpty(), "Optional should be empty when order not found");
+    }
+
+
+    @Test
+    void testFindAllOrdersReturnsPage() {
+        insertTestOrder("securePage1");
+        insertTestOrder("securePage2");
+
+        var pageable = new Pageable(0, 10);
+        var page = jdbcOrderDao.findAllOrders(pageable);
+
+        assertNotNull(page, "Page should not be null");
+        assertFalse(page.content().isEmpty(), "Orders list should not be empty");
+        assertTrue(page.totalElements() >= 2, "Total elements should be at least 2");
+    }
+
+
+    @Test
+    void testUpdateOrderStatusUpdatesStatus() {
+        Long orderId = insertTestOrder("secureToUpdate");
+
+        int rowsAffected = jdbcOrderDao.updateOrderStatus(orderId, OrderStatus.DELIVERED);
+
+        assertEquals(1, rowsAffected, "Exactly one row should be updated");
+
+        String updatedStatus = jdbcTemplate.queryForObject(
+                "SELECT status FROM orders WHERE id = ?",
+                String.class,
+                orderId
+        );
+        assertEquals("DELIVERED", updatedStatus, "Order status should be updated to DELIVERED");
+    }
+
+
+    @Test
+    void testUpdateOrderStatusReturnsZeroWhenNotFound() {
+        int rowsAffected = jdbcOrderDao.updateOrderStatus(999999L, OrderStatus.DELIVERED);
+        assertEquals(0, rowsAffected, "No rows should be updated for non-existent order");
+    }
+
 
     private Order buildTestOrder(String secureId) {
         Order order = new Order();

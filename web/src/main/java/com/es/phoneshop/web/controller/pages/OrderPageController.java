@@ -5,7 +5,6 @@ import com.es.core.exception.CartChangedException;
 import com.es.core.exception.NotValidDataException;
 import com.es.core.model.order.Order;
 import com.es.core.service.order.OrderService;
-import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
@@ -20,6 +19,12 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @RequestMapping("/order")
 public class OrderPageController {
 
+    private final OrderService orderService;
+
+    public OrderPageController(OrderService orderService) {
+        this.orderService = orderService;
+    }
+
     private static final String ORDER_DRAFT_ATTRIBUTE = "order";
     private static final String USER_PERSONAL_INFO_ATTRIBUTE = "userPersonalInfo";
     private static final String ERROR_ATTRIBUTE = "error";
@@ -30,9 +35,6 @@ public class OrderPageController {
     private static final String ORDER_PAGE = "orderPage";
     private static final String REDIRECT_ORDER_OVERVIEW_PAGE = "redirect:/orderOverview/%s";
     private static final String REDIRECT_ORDER_PAGE = "redirect:/order";
-
-    @Resource
-    private OrderService orderService;
 
     @RequestMapping(method = RequestMethod.GET)
     public String getOrder(HttpSession session, Model model) {
