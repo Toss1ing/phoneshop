@@ -1,3 +1,4 @@
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 
 <nav class="navbar navbar-expand-lg bg-light fixed-top border border-secondary">
@@ -17,6 +18,34 @@
                         $<span id="cart-total-price" class="fw-bold">0.00</span>
                     </a>
                 </li>
+
+                <sec:authorize access="!isAuthenticated()">
+                    <li class="nav-item">
+                        <a class="nav-link" href="${pageContext.request.contextPath}/login">login</a>
+                    </li>
+                </sec:authorize>
+
+                <sec:authorize access="isAuthenticated()">
+                    <li>
+                        <span class="nav-link">
+                            <a href="${pageContext.request.contextPath}/admin/orders">
+                                orders
+                            </a>
+                        </span>
+                    </li>
+                    <li class="nav-item">
+                        <span class="nav-link">
+                            <sec:authentication property="name"/>
+                        </span>
+                    </li>
+                    <li class="nav-item">
+                        <form id="logoutForm" action="${pageContext.request.contextPath}/logout" method="post"
+                              class="d-inline">
+                            <jsp:include page="/WEB-INF/pages/fragments/csrf.jsp"/>
+                            <button type="submit" class="btn btn-link nav-link">logout</button>
+                        </form>
+                    </li>
+                </sec:authorize>
             </ul>
         </div>
     </div>
