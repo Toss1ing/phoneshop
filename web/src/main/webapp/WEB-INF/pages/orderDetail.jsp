@@ -96,11 +96,13 @@
     <div class="d-flex justify-content-start mt-4 gap-2">
         <div class="d-flex justify-content-end gap-2 mt-3 mb-4">
             <form method="post" action="/phoneshop-web/admin/orders/${order.id}/status">
+                <jsp:include page="/WEB-INF/pages/fragments/csrf.jsp"/>
                 <input type="hidden" name="status" value="DELIVERED"/>
                 <button type="submit" class="btn btn-success">Delivered</button>
             </form>
 
             <form method="post" action="/phoneshop-web/admin/orders/${order.id}/status">
+                <jsp:include page="/WEB-INF/pages/fragments/csrf.jsp"/>
                 <input type="hidden" name="status" value="REJECTED"/>
                 <button type="submit" class="btn btn-danger">Rejected</button>
             </form>
