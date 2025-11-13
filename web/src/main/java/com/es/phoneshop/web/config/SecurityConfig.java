@@ -42,7 +42,7 @@ public class SecurityConfig {
                         .loginPage(LOGIN_URL)
                         .loginProcessingUrl(LOGIN_URL)
                         .defaultSuccessUrl(DEFAULT_SUCCESS_URL, true)
-                        .failureUrl(LOGIN_FAILURE_URL)
+                        .failureHandler(customAuthenticationFailureHandler())
                         .permitAll()
                 )
                 .logout(logout -> logout
@@ -52,6 +52,11 @@ public class SecurityConfig {
                 );
 
         return http.build();
+    }
+
+    @Bean
+    public CustomAuthenticationFailureHandler customAuthenticationFailureHandler() {
+        return new CustomAuthenticationFailureHandler(LOGIN_FAILURE_URL);
     }
 
     @Bean
