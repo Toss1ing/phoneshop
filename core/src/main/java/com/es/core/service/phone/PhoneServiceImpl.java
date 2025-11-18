@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class PhoneServiceImpl implements PhoneService {
 
@@ -93,5 +94,21 @@ public class PhoneServiceImpl implements PhoneService {
                 phone.getPrice()
         );
     }
+
+    @Override
+    public Map<String, Phone> findPhonesByModels(Set<String> models) {
+        if (models == null || models.isEmpty()) {
+            return Map.of();
+        }
+
+        List<Phone> phones = phoneDao.findPhonesByModels(models);
+
+        return phones.stream()
+                .collect(Collectors.toMap(
+                        Phone::getModel,
+                        phone -> phone
+                ));
+    }
+
 
 }

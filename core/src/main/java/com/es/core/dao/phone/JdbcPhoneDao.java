@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 
 public class JdbcPhoneDao implements PhoneDao {
@@ -117,6 +118,23 @@ public class JdbcPhoneDao implements PhoneDao {
                 totalElements
         );
     }
+
+    @Override
+    public List<Phone> findPhonesByModels(Set<String> models) {
+        if (models == null || models.isEmpty()) {
+            return List.of();
+        }
+
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue(TableColumnsNames.Phone.MODEL, models);
+
+        return namedParameterJdbcTemplate.query(
+                PhoneSql.SELECT_PHONES_BY_MODEL,
+                params,
+                phoneRowMapper
+        );
+    }
+
 
     private String buildQuery(Pageable pageable, String search, boolean isCount) {
         StringBuilder sql = new StringBuilder();

@@ -19,6 +19,12 @@
                     </a>
                 </li>
 
+                <li class="nav-item">
+                    <a class="nav-link position-relative" href="${pageContext.request.contextPath}/mass-add">
+                        mass add
+                    </a>
+                </li>
+
                 <sec:authorize access="!isAuthenticated()">
                     <li class="nav-item">
                         <a class="nav-link" href="${pageContext.request.contextPath}/login">login</a>
