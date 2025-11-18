@@ -1,5 +1,6 @@
 package com.es.core.service.cart;
 
+import com.es.core.dto.cart.MassAddToCart;
 import com.es.core.exception.NotFoundException;
 import com.es.core.model.cart.Cart;
 import com.es.core.model.cart.CartItem;
@@ -10,6 +11,7 @@ import com.es.core.util.ExceptionMessage;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -122,6 +124,65 @@ public class HttpSessionCartService implements CartService {
 
         stockService.cleanUpReserved(reservedItems);
     }
+
+    @Override
+    public void addPhonesByModels(MassAddToCart massAddToCart) {
+
+        sessionLock.writeLock().lock();
+        try {
+            Map<String, Integer> items = extractValidItems(massAddToCart);
+
+            if (items.isEmpty()) {
+                return;
+            }
+
+            Map<String, Phone> phones = phoneService.findPhonesByModels(items.keySet());
+
+            Map<Long, Integer> phoneIdToQuantity = new HashMap<>();
+            for (Map.Entry<String, Integer> entry : items.entrySet()) {
+                Phone phone = phones.get(entry.getKey());
+                phoneIdToQuantity.put(phone.getId(), entry.getValue());
+            }
+
+            stockService.reserveAndValidateItems(phoneIdToQuantity);
+
+            for (Map.Entry<String, Integer> entry : items.entrySet()) {
+                Phone phone = phones.get(entry.getKey());
+                int qty = entry.getValue();
+
+                CartItem existing = getCartItemByPhoneId(phone.getId());
+                if (existing == null) {
+                    cart.getItems().add(new CartItem(phone, qty));
+                } else {
+                    existing.setQuantity(existing.getQuantity() + qty);
+                }
+            }
+
+            recalculateCart();
+
+        } finally {
+            sessionLock.writeLock().unlock();
+        }
+    }
+
+    private Map<String, Integer> extractValidItems(MassAddToCart massAddToCart) {
+        Map<String, Integer> result = new LinkedHashMap<>();
+
+        for (int i = 0; i < 8; i++) {
+            String code = massAddToCart.getProductModels().get(i);
+            Integer qty = massAddToCart.getQuantities().get(i);
+
+            if (code != null && !code.isBlank()
+                    && qty != null && qty >= 1) {
+
+                result.put(code.trim(), qty);
+            }
+        }
+
+        return result;
+    }
+
+
 
     private void recalculateCart() {
         long totalQuantity = cart.getItems().stream()

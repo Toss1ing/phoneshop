@@ -69,4 +69,11 @@ public final class PhoneSql {
     public static final String ORDER_BY_ID = " ORDER BY p.id";
 
     public static final String PAGINATION = " LIMIT :limit OFFSET :offset";
+
+    public static final String SELECT_PHONES_BY_MODEL = """
+            SELECT p.*
+            FROM phones p
+            WHERE p.model IN (:model)
+        """;
+
 }

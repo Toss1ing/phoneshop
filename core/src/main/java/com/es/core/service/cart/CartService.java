@@ -1,5 +1,6 @@
 package com.es.core.service.cart;
 
+import com.es.core.dto.cart.MassAddToCart;
 import com.es.core.model.cart.Cart;
 
 import java.util.Map;
@@ -15,5 +16,7 @@ public interface CartService {
     void remove(Long phoneId);
 
     void cleanupSessionAndReservedItems();
+
+    void addPhonesByModels(MassAddToCart massAddToCart);
 
 }
